@@ -1,0 +1,55 @@
+{
+  "name": "onlyfile-vscode",
+  "displayName": "Onlyfile",
+  "description": "Language support for Onlyfile with syntax highlighting and a path to LSP diagnostics.",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:onlyfile"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "onlyfile",
+        "aliases": [
+          "Onlyfile",
+          "onlyfile"
+        ],
+        "filenames": [
+          "Onlyfile",
+          "onlyfile"
+        ],
+        "extensions": [
+          ".only"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "onlyfile",
+        "scopeName": "source.onlyfile",
+        "path": "./syntaxes/onlyfile.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "check": "tsc -p ./ --noEmit"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "@types/vscode": "^1.99.0",
+    "typescript": "^5.8.3"
+  }
+}

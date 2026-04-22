@@ -1,0 +1,134 @@
+{
+  "name": "Onlyfile",
+  "scopeName": "source.onlyfile",
+  "patterns": [
+    { "include": "#docComment" },
+    { "include": "#lineComment" },
+    { "include": "#namespace" },
+    { "include": "#directive" },
+    { "include": "#taskHeader" },
+    { "include": "#interpolation" },
+    { "include": "#string" }
+  ],
+  "repository": {
+    "docComment": {
+      "name": "meta.documentation.onlyfile",
+      "match": "^(\\s*)(%)(.*)$",
+      "captures": {
+        "2": { "name": "punctuation.definition.documentation.onlyfile" },
+        "3": { "name": "markup.quote.documentation.onlyfile" }
+      }
+    },
+    "lineComment": {
+      "name": "comment.line.number-sign.onlyfile",
+      "match": "#.*$"
+    },
+    "namespace": {
+      "name": "meta.namespace.onlyfile",
+      "match": "^(\\s*)(\\[)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)$",
+      "captures": {
+        "2": { "name": "punctuation.section.brackets.begin.onlyfile" },
+        "3": { "name": "entity.name.namespace.onlyfile" },
+        "4": { "name": "punctuation.section.brackets.end.onlyfile" }
+      }
+    },
+    "directive": {
+      "name": "meta.directive.onlyfile",
+      "match": "^(\\s*)(![A-Za-z_-][A-Za-z0-9_-]*)(?:\\s+.*)?$",
+      "captures": {
+        "2": { "name": "keyword.control.guard.onlyfile" }
+      }
+    },
+    "taskHeader": {
+      "name": "meta.task.header.onlyfile",
+      "begin": "^(\\s*)([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*\\()",
+      "beginCaptures": {
+        "2": { "name": "entity.name.function.task.onlyfile" }
+      },
+      "end": ":\\s*(?:#.*)?$",
+      "endCaptures": {
+        "0": { "name": "punctuation.separator.header.onlyfile" }
+      },
+      "patterns": [
+        {
+          "name": "variable.parameter.onlyfile",
+          "match": "(?<=\\(|,)\\s*([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*(?:=|,|\\)))"
+        },
+        {
+          "name": "keyword.control.guard.onlyfile",
+          "match": "\\?"
+        },
+        {
+          "name": "keyword.operator.dependency.onlyfile",
+          "match": "&"
+        },
+        {
+          "match": "(?<=&)\\s*([A-Za-z_-][A-Za-z0-9_.-]*)",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.dependency.onlyfile"
+            }
+          }
+        },
+        {
+          "name": "support.function.guard.onlyfile",
+          "match": "(?<=@)[A-Za-z_-][A-Za-z0-9_-]*"
+        },
+        {
+          "match": "\\b(shell\\?=|shell=)(?=\\S)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.guard.onlyfile"
+            }
+          }
+        },
+        {
+          "name": "keyword.operator.assignment.onlyfile",
+          "match": "="
+        },
+        { "include": "#string" },
+        { "include": "#interpolation" },
+        { "include": "#boolean" }
+      ]
+    },
+    "interpolation": {
+      "name": "meta.interpolation.onlyfile",
+      "begin": "\\{\\{",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.interpolation.begin.onlyfile" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.interpolation.end.onlyfile" }
+      },
+      "patterns": [
+        {
+          "name": "variable.parameter.interpolation.onlyfile",
+          "match": "[A-Za-z_-][A-Za-z0-9_-]*"
+        }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.onlyfile",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.onlyfile" }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.onlyfile" }
+      },
+      "patterns": [
+        {
+          "name": "constant.character.escape.onlyfile",
+          "match": "\\\\."
+        },
+        { "include": "#interpolation" }
+      ]
+    },
+    "boolean": {
+      "name": "constant.language.boolean.onlyfile",
+      "match": "\\b(?:true|false)\\b"
+    }
+  }
+}
