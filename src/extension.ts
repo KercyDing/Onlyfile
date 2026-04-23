@@ -33,7 +33,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const serverOptions = resolveServerOptions(context, output);
   if (!serverOptions) {
     const message =
-      "Onlyfile LSP server was not found. Set ONLY_LSP_BIN or keep the Rust repo at ../only.";
+      "Onlyfile LSP server was not found. Set ONLY_LSP_BIN or place only-lsp in bin/.";
     output.appendLine(message);
     void vscode.window.showErrorMessage(message);
     return;
@@ -85,28 +85,14 @@ function resolveServerOptions(
     return { run: executable, debug: executable };
   }
 
-  const repoRoot = path.resolve(context.extensionPath, "../only");
-  output.appendLine(`Resolved only repo root: ${repoRoot}`);
-
-  const builtBinary = path.join(repoRoot, "target", "debug", binaryName("only-lsp"));
-  if (fs.existsSync(builtBinary)) {
-    output.appendLine(`Using built only-lsp binary: ${builtBinary}`);
-    const executable = toExecutable(builtBinary, [], repoRoot);
+  const bundledBinary = path.join(context.extensionPath, "bin", binaryName("only-lsp"));
+  if (fs.existsSync(bundledBinary)) {
+    output.appendLine(`Using bundled only-lsp binary: ${bundledBinary}`);
+    const executable = toExecutable(bundledBinary, []);
     return { run: executable, debug: executable };
   }
 
-  const manifest = path.join(repoRoot, "Cargo.toml");
-  if (fs.existsSync(manifest)) {
-    output.appendLine("Using cargo run fallback for only-lsp.");
-    const executable = toExecutable(
-      "cargo",
-      ["run", "-p", "only-lsp", "--quiet", "--"],
-      repoRoot,
-    );
-    return { run: executable, debug: executable };
-  }
-
-  output.appendLine("No only-lsp server executable or Cargo.toml was found.");
+  output.appendLine("No only-lsp server executable was found.");
   return undefined;
 }
 

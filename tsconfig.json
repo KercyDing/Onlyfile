@@ -3,13 +3,13 @@
     "module": "commonjs",
     "target": "ES2022",
     "lib": ["ES2022"],
-    "outDir": "out",
     "rootDir": "src",
     "strict": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "types": ["node", "vscode"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "include": ["src"]
 }

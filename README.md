@@ -1,15 +1,32 @@
 # Onlyfile VS Code Extension
 
-Minimal VS Code extension scaffold for the `Onlyfile` language.
+VS Code support for the `Onlyfile` language.
 
-Current scope:
-- file association for `Onlyfile`, `onlyfile`, and `.onlyfile`
+Current features:
+- file association for `Onlyfile` and `onlyfile`
 - TextMate syntax highlighting
-- basic editor language configuration registered from the extension entrypoint
-- thin extension entrypoint ready for later LSP client wiring
+- editor language configuration for `#` comments, brackets, and quotes
+- automatic startup of the `only-lsp` language client
+- diagnostics, hover, and other LSP features when `only-lsp` is available
 
-Suggested next steps:
-1. Run `npm install`.
-2. Run `npm run build`.
-3. Open this folder in VS Code and press `F5` to launch an Extension Development Host.
-4. Add a Rust-backed LSP client in `src/extension.ts` once the protocol surface is ready.
+The extension resolves the language server in this order:
+1. `ONLY_LSP_BIN`
+2. bundled `bin/only-lsp`
+
+## Local development
+
+1. `pnpm install`
+2. `pnpm build`
+3. Press `F5` in VS Code to launch an Extension Development Host
+4. Open an `Onlyfile` or `onlyfile` file
+
+## Packaging
+
+- The extension entrypoint is bundled into `dist/extension.js` for release builds.
+- The release package expects either `ONLY_LSP_BIN` or a bundled `bin/only-lsp` binary.
+- If the server does not start, check the `Onlyfile` output channel in VS Code.
+
+## Notes
+
+- For a real release, prefer bundling a release `only-lsp` binary instead of a debug build.
+- The current package still bundles only one platform-specific `only-lsp` binary.
