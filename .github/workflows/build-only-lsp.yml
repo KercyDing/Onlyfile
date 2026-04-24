@@ -1,0 +1,88 @@
+name: Build only-lsp assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+            binary_path: target/aarch64-apple-darwin/release/only-lsp
+            asset_name: only-lsp-darwin-arm64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            binary_path: target/x86_64-apple-darwin/release/only-lsp
+            asset_name: only-lsp-darwin-x64
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            binary_path: target/x86_64-unknown-linux-gnu/release/only-lsp
+            asset_name: only-lsp-linux-x64
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            binary_path: target/x86_64-pc-windows-msvc/release/only-lsp.exe
+            asset_name: only-lsp-win32-x64.exe
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Clone only source
+        shell: bash
+        run: git clone --depth 1 --branch master https://github.com/KercyDing/only.git only
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build only-lsp
+        shell: bash
+        working-directory: only
+        run: cargo build --release -p only-lsp --target "${{ matrix.target }}"
+
+      - name: Copy release asset
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "only/${{ matrix.binary_path }}" "dist/${{ matrix.asset_name }}"
+
+      - name: Write sha256
+        shell: bash
+        run: |
+          node -e "const fs=require('node:fs'); const crypto=require('node:crypto'); const file=process.argv[1]; const data=fs.readFileSync(file); const hash=crypto.createHash('sha256').update(data).digest('hex'); fs.writeFileSync(file + '.sha256', hash + '  ' + require('node:path').basename(file) + '\n');" "dist/${{ matrix.asset_name }}"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: |
+            dist/${{ matrix.asset_name }}
+            dist/${{ matrix.asset_name }}.sha256
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate release tag
+        id: tag
+        run: echo "value=lsp-$(date -u +'%Y%m%d-%H%M%S')" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          name: ${{ steps.tag.outputs.value }}
+          generate_release_notes: false
+          files: dist/*
