@@ -1,35 +1,53 @@
 {
   "name": "onlyfile",
   "displayName": "Only",
+  "version": "0.0.4",
   "description": "VS Code support for Onlyfile with syntax highlighting and only-lsp integration.",
-  "version": "0.0.3",
-  "publisher": "kercyding",
-  "engines": {
-    "vscode": "^1.99.0"
-  },
   "categories": [
     "Programming Languages"
   ],
   "keywords": [
+    "lsp",
     "only",
     "onlyfile",
-    "task",
-    "lsp"
+    "task"
   ],
+  "homepage": "https://github.com/KercyDing/Onlyfile#readme",
+  "bugs": {
+    "url": "https://github.com/KercyDing/Onlyfile/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/KercyDing/Onlyfile.git"
   },
-  "homepage": "https://github.com/KercyDing/Onlyfile#readme",
-  "icon": "media/icon.png",
-  "bugs": {
-    "url": "https://github.com/KercyDing/Onlyfile/issues"
-  },
-  "activationEvents": [
-    "onLanguage:onlyfile"
-  ],
+  "publisher": "kercyding",
   "main": "./dist/extension.js",
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js",
+    "watch": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js --watch",
+    "check": "tsc -p ./ --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.15.17",
+    "@types/vscode": "^1.99.0",
+    "esbuild": "^0.25.3",
+    "typescript": "^5.8.3",
+    "vscode-languageclient": "^9.0.1"
+  },
   "contributes": {
+    "commands": [
+      {
+        "command": "onlyfile.restartLsp",
+        "title": "Onlyfile: Restart LSP",
+        "category": "Onlyfile"
+      },
+      {
+        "command": "onlyfile.reinstallLsp",
+        "title": "Onlyfile: Reinstall LSP",
+        "category": "Onlyfile"
+      }
+    ],
     "languages": [
       {
         "id": "onlyfile",
@@ -51,17 +69,13 @@
       }
     ]
   },
-  "scripts": {
-    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js",
-    "watch": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js --watch",
-    "check": "tsc -p ./ --noEmit"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@types/node": "^22.15.17",
-    "@types/vscode": "^1.99.0",
-    "esbuild": "^0.25.3",
-    "typescript": "^5.8.3",
-    "vscode-languageclient": "^9.0.1"
+  "activationEvents": [
+    "onCommand:onlyfile.reinstallLsp",
+    "onCommand:onlyfile.restartLsp",
+    "onLanguage:onlyfile"
+  ],
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.99.0"
   }
 }

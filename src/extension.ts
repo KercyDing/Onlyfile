@@ -23,10 +23,16 @@ type LatestRelease = {
   assets: ReleaseAsset[];
 };
 
+type ResolveServerOptions = {
+  forceRedownload?: boolean;
+};
+
 let client: LanguageClient | undefined;
+let outputChannel: vscode.OutputChannel | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const output = vscode.window.createOutputChannel("Onlyfile");
+  outputChannel = output;
   context.subscriptions.push(output);
 
   output.appendLine("Activating Onlyfile extension.");
@@ -34,22 +40,79 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   context.subscriptions.push(
     vscode.languages.setLanguageConfiguration("onlyfile", {
       comments: { lineComment: "#" },
-      brackets: [["[", "]"], ["(", ")"]],
+      brackets: [
+        ["[", "]"],
+        ["(", ")"],
+      ],
       autoClosingPairs: [
         { open: "[", close: "]" },
         { open: "(", close: ")" },
-        { open: "\"", close: "\"" },
+        { open: '"', close: '"' },
       ],
     }),
   );
 
-  const serverOptions = await resolveServerOptions(context, output);
+  registerCommands(context, output);
+  await startLanguageClient(context, output);
+}
+
+export async function deactivate(): Promise<void> {
+  if (!outputChannel) {
+    return;
+  }
+
+  await stopLanguageClient(outputChannel);
+  outputChannel = undefined;
+}
+
+function registerCommands(context: vscode.ExtensionContext, output: vscode.OutputChannel): void {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("onlyfile.restartLsp", async () => {
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Onlyfile",
+          cancellable: false,
+        },
+        async (progress) => {
+          progress.report({ message: "Restarting only-lsp..." });
+          const restarted = await restartLanguageClient(context, output);
+          if (restarted) {
+            void vscode.window.showInformationMessage("Restarted only-lsp successfully.");
+          }
+        },
+      );
+    }),
+    vscode.commands.registerCommand("onlyfile.reinstallLsp", async () => {
+      const explicitBinary = process.env.ONLY_LSP_BIN;
+      const downloaded = await downloadManagedBinary(context, output, { forceRedownload: true });
+      if (!downloaded) {
+        return;
+      }
+      await restartLanguageClient(context, output);
+      if (explicitBinary && fs.existsSync(explicitBinary)) {
+        void vscode.window.showInformationMessage(
+          `Reinstalled bundled only-lsp, but ONLY_LSP_BIN is still preferred: ${explicitBinary}`,
+        );
+      } else {
+        void vscode.window.showInformationMessage("Reinstalled only-lsp successfully.");
+      }
+    }),
+  );
+}
+
+async function startLanguageClient(
+  context: vscode.ExtensionContext,
+  output: vscode.OutputChannel,
+  options?: ResolveServerOptions,
+): Promise<boolean> {
+  const serverOptions = await resolveServerOptions(context, output, options);
   if (!serverOptions) {
     const message =
       "Onlyfile LSP server was not found. Set ONLY_LSP_BIN or check the Onlyfile output channel.";
     output.appendLine(message);
     void vscode.window.showErrorMessage(message);
-    return;
+    return false;
   }
 
   const clientOptions: LanguageClientOptions = {
@@ -74,22 +137,43 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   try {
     await client.start();
     output.appendLine("Onlyfile language client started.");
+    return true;
   } catch (error) {
     output.appendLine(`Failed to start Onlyfile language client: ${String(error)}`);
     void vscode.window.showErrorMessage(
       `Failed to start Onlyfile language client: ${String(error)}`,
     );
+    client = undefined;
+    return false;
   }
 }
 
-export async function deactivate(): Promise<void> {
-  await client?.dispose();
+async function stopLanguageClient(output: vscode.OutputChannel): Promise<void> {
+  if (!client) {
+    output.appendLine("Onlyfile language client is not running.");
+    return;
+  }
+
+  output.appendLine("Stopping Onlyfile language client.");
+  await client.dispose();
   client = undefined;
+  output.appendLine("Onlyfile language client stopped.");
+}
+
+async function restartLanguageClient(
+  context: vscode.ExtensionContext,
+  output: vscode.OutputChannel,
+  options?: ResolveServerOptions,
+): Promise<boolean> {
+  output.appendLine("Restarting Onlyfile language client.");
+  await stopLanguageClient(output);
+  return await startLanguageClient(context, output, options);
 }
 
 async function resolveServerOptions(
   context: vscode.ExtensionContext,
   output: vscode.OutputChannel,
+  options?: ResolveServerOptions,
 ): Promise<ServerOptions | undefined> {
   const explicitBinary = process.env.ONLY_LSP_BIN;
   if (explicitBinary && fs.existsSync(explicitBinary)) {
@@ -98,7 +182,7 @@ async function resolveServerOptions(
     return { run: executable, debug: executable };
   }
 
-  const cachedBinary = await resolveCachedBinary(context, output);
+  const cachedBinary = await resolveCachedBinary(context, output, options);
   if (cachedBinary) {
     output.appendLine(`Using downloaded only-lsp binary: ${cachedBinary}`);
     const executable = toExecutable(cachedBinary, []);
@@ -109,9 +193,10 @@ async function resolveServerOptions(
   return undefined;
 }
 
-async function resolveCachedBinary(
+async function downloadManagedBinary(
   context: vscode.ExtensionContext,
   output: vscode.OutputChannel,
+  options?: ResolveServerOptions,
 ): Promise<string | undefined> {
   const platformId = currentPlatformId();
   if (!platformId) {
@@ -123,44 +208,82 @@ async function resolveCachedBinary(
 
   const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
   const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
-  if (fs.existsSync(binaryPath)) {
-    await ensureExecutable(binaryPath);
-    return binaryPath;
-  }
+  const versionPath = path.join(cacheDir, "version.json");
 
   try {
     await fs.promises.mkdir(cacheDir, { recursive: true });
-    const release = await fetchLatestRelease();
-    const asset = release.assets.find((candidate) => candidate.name === assetName(platformId));
-    if (!asset) {
-      output.appendLine(`No only-lsp asset for ${platformId} in ${release.tag_name}.`);
-      return undefined;
+    if (options?.forceRedownload) {
+      output.appendLine(`Removing cached only-lsp for ${platformId}.`);
+      await fs.promises.rm(binaryPath, { force: true });
+      await fs.promises.rm(versionPath, { force: true });
     }
 
-    output.appendLine(`Downloading only-lsp ${release.tag_name} from GitHub for ${platformId}.`);
-    void vscode.window.showInformationMessage("Downloading only-lsp from GitHub...");
-    await downloadFile(asset.browser_download_url, binaryPath);
-    await ensureExecutable(binaryPath);
-    await fs.promises.writeFile(
-      path.join(cacheDir, "version.json"),
-      `${JSON.stringify({ version: release.tag_name, asset: asset.name }, null, 2)}\n`,
-      "utf8",
+    return await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Onlyfile",
+        cancellable: false,
+      },
+      async (progress) => {
+        progress.report({ message: "Resolving latest only-lsp release..." });
+        const release = await fetchLatestRelease();
+        const asset = release.assets.find((candidate) => candidate.name === assetName(platformId));
+        if (!asset) {
+          output.appendLine(`No only-lsp asset for ${platformId} in ${release.tag_name}.`);
+          return undefined;
+        }
+
+        output.appendLine(
+          `Downloading only-lsp ${release.tag_name} from GitHub for ${platformId}.`,
+        );
+        progress.report({ message: "Downloading only-lsp from GitHub..." });
+        await downloadFile(asset.browser_download_url, binaryPath);
+
+        progress.report({ message: "Installing only-lsp..." });
+        await ensureExecutable(binaryPath);
+        await fs.promises.writeFile(
+          versionPath,
+          `${JSON.stringify({ version: release.tag_name, asset: asset.name }, null, 2)}\n`,
+          "utf8",
+        );
+        return binaryPath;
+      },
     );
-    return binaryPath;
   } catch (error) {
     const message = downloadFailureMessage(error);
     output.appendLine(`Failed to download only-lsp from GitHub: ${message}`);
-    void vscode.window.showWarningMessage(
-      `Unable to download only-lsp from GitHub. ${message}`,
+    void vscode.window.showWarningMessage(`Unable to download only-lsp from GitHub. ${message}`);
+    return undefined;
+  }
+}
+
+async function resolveCachedBinary(
+  context: vscode.ExtensionContext,
+  output: vscode.OutputChannel,
+  options?: ResolveServerOptions,
+): Promise<string | undefined> {
+  const platformId = currentPlatformId();
+  if (!platformId) {
+    output.appendLine(
+      `Unsupported platform for only-lsp download: ${process.platform}-${process.arch}`,
     );
     return undefined;
   }
+
+  const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
+  const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
+  if (!options?.forceRedownload && fs.existsSync(binaryPath)) {
+    await ensureExecutable(binaryPath);
+    return binaryPath;
+  }
+
+  return await downloadManagedBinary(context, output, options);
 }
 
 async function fetchLatestRelease(): Promise<LatestRelease> {
   const response = await fetch(ONLY_RELEASE_API, {
     headers: {
-      "Accept": "application/vnd.github+json",
+      Accept: "application/vnd.github+json",
       "User-Agent": "kercyding.onlyfile-vscode",
     },
     signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
@@ -170,11 +293,7 @@ async function fetchLatestRelease(): Promise<LatestRelease> {
     throw new Error(`GitHub release request failed: ${response.status} ${response.statusText}`);
   }
 
-  const release = await response.json() as LatestRelease;
-  if (!release.tag_name.startsWith("v")) {
-    throw new Error(`latest release tag is not a v-prefixed version: ${release.tag_name}`);
-  }
-  return release;
+  return (await response.json()) as LatestRelease;
 }
 
 async function downloadFile(url: string, destination: string): Promise<void> {
@@ -225,9 +344,7 @@ function currentPlatformId(): string | undefined {
 }
 
 function assetName(platformId: string): string {
-  return process.platform === "win32"
-    ? `only-lsp-${platformId}.exe`
-    : `only-lsp-${platformId}`;
+  return process.platform === "win32" ? `only-lsp-${platformId}.exe` : `only-lsp-${platformId}`;
 }
 
 function toExecutable(command: string, args: string[], cwd?: string): Executable {

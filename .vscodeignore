@@ -8,3 +8,5 @@ tsconfig.json
 pnpm-lock.yaml
 *.vsix
 media/icon.svg
+.github/**
+.claude/**
