@@ -18290,7 +18290,15 @@ async function downloadManagedBinary(context, output, options) {
         await ensureExecutable(binaryPath);
         await fs.promises.writeFile(
           versionPath,
-          `${JSON.stringify({ version: release.tag_name, asset: asset.name }, null, 2)}
+          `${JSON.stringify(
+            {
+              version: release.tag_name,
+              asset: asset.name,
+              extensionVersion: extensionReleaseTag(context)
+            },
+            null,
+            2
+          )}
 `,
           "utf8"
         );
@@ -18314,11 +18322,38 @@ async function resolveCachedBinary(context, output, options) {
   }
   const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
   const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
+  const versionPath = path.join(cacheDir, "version.json");
   if (!options?.forceRedownload && fs.existsSync(binaryPath)) {
+    const metadata = await readCachedBinaryMetadata(versionPath);
+    const minimumVersion = extensionReleaseTag(context);
+    if (!isCachedBinaryCurrent(metadata, minimumVersion, assetName(platformId))) {
+      output.appendLine(
+        `Cached only-lsp is stale or missing metadata; expected at least ${minimumVersion}.`
+      );
+      return await downloadManagedBinary(context, output, { forceRedownload: true });
+    }
     await ensureExecutable(binaryPath);
     return binaryPath;
   }
   return await downloadManagedBinary(context, output, options);
+}
+async function readCachedBinaryMetadata(versionPath) {
+  try {
+    return JSON.parse(await fs.promises.readFile(versionPath, "utf8"));
+  } catch {
+    return void 0;
+  }
+}
+function isCachedBinaryCurrent(metadata, minimumVersion, expectedAsset) {
+  if (!metadata?.version || metadata.asset !== expectedAsset) {
+    return false;
+  }
+  return metadata.extensionVersion === minimumVersion;
+}
+function extensionReleaseTag(context) {
+  const packageJson = context.extension.packageJSON;
+  const version = typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
+  return version.startsWith("v") ? version : `v${version}`;
 }
 async function fetchLatestRelease() {
   const response = await fetch(ONLY_RELEASE_API, {
@@ -18369,8 +18404,14 @@ function currentPlatformId() {
   if (process.platform === "linux" && process.arch === "x64") {
     return "linux-x64";
   }
+  if (process.platform === "linux" && process.arch === "arm64") {
+    return "linux-arm64";
+  }
   if (process.platform === "win32" && process.arch === "x64") {
     return "win32-x64";
+  }
+  if (process.platform === "win32" && process.arch === "arm64") {
+    return "win32-arm64";
   }
   return void 0;
 }

@@ -15,11 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-latest
+          - runner: macos-15
             target: aarch64-apple-darwin
             binary_path: target/aarch64-apple-darwin/release/only-lsp
             asset_name: only-lsp-darwin-arm64
-          - runner: macos-latest
+          - runner: macos-15-intel
             target: x86_64-apple-darwin
             binary_path: target/x86_64-apple-darwin/release/only-lsp
             asset_name: only-lsp-darwin-x64
@@ -27,10 +27,18 @@ jobs:
             target: x86_64-unknown-linux-musl
             binary_path: target/x86_64-unknown-linux-musl/release/only-lsp
             asset_name: only-lsp-linux-x64
+          - runner: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            binary_path: target/aarch64-unknown-linux-gnu/release/only-lsp
+            asset_name: only-lsp-linux-arm64
           - runner: windows-latest
             target: x86_64-pc-windows-msvc
             binary_path: target/x86_64-pc-windows-msvc/release/only-lsp.exe
             asset_name: only-lsp-win32-x64.exe
+          - runner: windows-latest
+            target: aarch64-pc-windows-msvc
+            binary_path: target/aarch64-pc-windows-msvc/release/only-lsp.exe
+            asset_name: only-lsp-win32-arm64.exe
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -48,10 +56,16 @@ jobs:
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: sudo apt-get update && sudo apt-get install -y musl-tools
 
+      - name: Install Linux ARM64 linker
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+
       - name: Build only-lsp
         shell: bash
         working-directory: only
         run: cargo build --release -p only-lsp --target "${{ matrix.target }}" --locked
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
 
       - name: Copy release asset
         shell: bash

@@ -23,6 +23,12 @@ type LatestRelease = {
   assets: ReleaseAsset[];
 };
 
+type CachedBinaryMetadata = {
+  version?: string;
+  asset?: string;
+  extensionVersion?: string;
+};
+
 type ResolveServerOptions = {
   forceRedownload?: boolean;
 };
@@ -243,7 +249,15 @@ async function downloadManagedBinary(
         await ensureExecutable(binaryPath);
         await fs.promises.writeFile(
           versionPath,
-          `${JSON.stringify({ version: release.tag_name, asset: asset.name }, null, 2)}\n`,
+          `${JSON.stringify(
+            {
+              version: release.tag_name,
+              asset: asset.name,
+              extensionVersion: extensionReleaseTag(context),
+            },
+            null,
+            2,
+          )}\n`,
           "utf8",
         );
         return binaryPath;
@@ -272,12 +286,50 @@ async function resolveCachedBinary(
 
   const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
   const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
+  const versionPath = path.join(cacheDir, "version.json");
   if (!options?.forceRedownload && fs.existsSync(binaryPath)) {
+    const metadata = await readCachedBinaryMetadata(versionPath);
+    const minimumVersion = extensionReleaseTag(context);
+    if (!isCachedBinaryCurrent(metadata, minimumVersion, assetName(platformId))) {
+      output.appendLine(
+        `Cached only-lsp is stale or missing metadata; expected at least ${minimumVersion}.`,
+      );
+      return await downloadManagedBinary(context, output, { forceRedownload: true });
+    }
+
     await ensureExecutable(binaryPath);
     return binaryPath;
   }
 
   return await downloadManagedBinary(context, output, options);
+}
+
+async function readCachedBinaryMetadata(
+  versionPath: string,
+): Promise<CachedBinaryMetadata | undefined> {
+  try {
+    return JSON.parse(await fs.promises.readFile(versionPath, "utf8")) as CachedBinaryMetadata;
+  } catch {
+    return undefined;
+  }
+}
+
+function isCachedBinaryCurrent(
+  metadata: CachedBinaryMetadata | undefined,
+  minimumVersion: string,
+  expectedAsset: string,
+): boolean {
+  if (!metadata?.version || metadata.asset !== expectedAsset) {
+    return false;
+  }
+
+  return metadata.extensionVersion === minimumVersion;
+}
+
+function extensionReleaseTag(context: vscode.ExtensionContext): string {
+  const packageJson = context.extension.packageJSON as { version?: unknown };
+  const version = typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
+  return version.startsWith("v") ? version : `v${version}`;
 }
 
 async function fetchLatestRelease(): Promise<LatestRelease> {
@@ -337,8 +389,14 @@ function currentPlatformId(): string | undefined {
   if (process.platform === "linux" && process.arch === "x64") {
     return "linux-x64";
   }
+  if (process.platform === "linux" && process.arch === "arm64") {
+    return "linux-arm64";
+  }
   if (process.platform === "win32" && process.arch === "x64") {
     return "win32-x64";
+  }
+  if (process.platform === "win32" && process.arch === "arm64") {
+    return "win32-arm64";
   }
   return undefined;
 }
