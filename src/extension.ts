@@ -45,7 +45,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   context.subscriptions.push(
     vscode.languages.setLanguageConfiguration("onlyfile", {
-      comments: { lineComment: "#" },
+      comments: { lineComment: "//" },
       brackets: [
         ["[", "]"],
         ["(", ")"],

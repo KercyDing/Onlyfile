@@ -18124,7 +18124,7 @@ async function activate(context) {
   output.appendLine("Activating Onlyfile extension.");
   context.subscriptions.push(
     vscode.languages.setLanguageConfiguration("onlyfile", {
-      comments: { lineComment: "#" },
+      comments: { lineComment: "//" },
       brackets: [
         ["[", "]"],
         ["(", ")"]
