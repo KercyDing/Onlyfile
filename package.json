@@ -1,7 +1,7 @@
 {
   "name": "onlyfile",
   "displayName": "Only",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "VS Code support for Onlyfile with syntax highlighting and only-lsp integration.",
   "categories": [
     "Programming Languages"
