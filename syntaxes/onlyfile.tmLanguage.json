@@ -9,6 +9,7 @@
     { "include": "#versionDirective" },
     { "include": "#variableDirective" },
     { "include": "#directive" },
+    { "include": "#invalidInlineTask" },
     { "include": "#taskHeader" },
     { "include": "#commandBlock" },
     { "include": "#interpolation" }
@@ -71,6 +72,10 @@
       "captures": {
         "2": { "name": "keyword.control.guard.onlyfile" }
       }
+    },
+    "invalidInlineTask": {
+      "name": "invalid.illegal.inline-task-command.onlyfile",
+      "match": "^(\\s*)[A-Za-z_-][A-Za-z0-9_-]*(?=\\s*\\().*:[ \\t]+\\S.*$"
     },
     "taskHeader": {
       "name": "meta.task.header.onlyfile",
