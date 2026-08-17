@@ -8,6 +8,7 @@
     { "include": "#versionDirective" },
     { "include": "#directive" },
     { "include": "#taskHeader" },
+    { "include": "#commandBlock" },
     { "include": "#interpolation" },
     { "include": "#string" }
   ],
@@ -101,6 +102,19 @@
         { "include": "#string" },
         { "include": "#interpolation" },
         { "include": "#boolean" }
+      ]
+    },
+    "commandBlock": {
+      "name": "meta.command.block.onlyfile",
+      "begin": "^(\\s*)(\\|)(?=[ \\t]|$)",
+      "beginCaptures": {
+        "2": { "name": "punctuation.definition.block.onlyfile" }
+      },
+      "end": "$",
+      "contentName": "string.unquoted.command.block.onlyfile",
+      "patterns": [
+        { "include": "#interpolation" },
+        { "include": "#string" }
       ]
     },
     "interpolation": {
