@@ -23,6 +23,7 @@
   "publisher": "kercyding",
   "main": "./dist/extension.js",
   "scripts": {
+    "vscode:prepublish": "pnpm build",
     "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js",
     "watch": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js --watch",
     "check": "tsc -p ./ --noEmit"
@@ -40,11 +41,6 @@
       {
         "command": "onlyfile.restartLsp",
         "title": "Onlyfile: Restart LSP",
-        "category": "Onlyfile"
-      },
-      {
-        "command": "onlyfile.reinstallLsp",
-        "title": "Onlyfile: Reinstall LSP",
         "category": "Onlyfile"
       }
     ],

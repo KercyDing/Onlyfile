@@ -1,4 +1,4 @@
-name: Build only-lsp assets
+name: Package Onlyfile extension
 
 on:
   workflow_dispatch:
@@ -78,7 +78,7 @@ jobs:
         run: |
           node -e "const fs=require('node:fs'); const crypto=require('node:crypto'); const file=process.argv[1]; const data=fs.readFileSync(file); const hash=crypto.createHash('sha256').update(data).digest('hex'); fs.writeFileSync(file + '.sha256', hash + '  ' + require('node:path').basename(file) + '\n');" "dist/${{ matrix.asset_name }}"
 
-      - name: Upload workflow artifacts
+      - name: Upload build assets
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target }}-bin
@@ -86,25 +86,100 @@ jobs:
             dist/${{ matrix.asset_name }}
             dist/${{ matrix.asset_name }}.sha256
 
-  publish:
+  package:
     needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+
+    steps:
+      - name: Check out extension source
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install extension dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build assets
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Embed only-lsp assets
+        shell: bash
+        run: |
+          assets=(
+            only-lsp-darwin-arm64
+            only-lsp-darwin-x64
+            only-lsp-linux-arm64
+            only-lsp-linux-x64
+            only-lsp-win32-arm64.exe
+            only-lsp-win32-x64.exe
+          )
+          for asset in "${assets[@]}"; do
+            test -f "release-assets/$asset"
+            cp "release-assets/$asset" "lsp/$asset"
+          done
+          chmod +x lsp/only-lsp-*
+
+      - name: Read extension version
+        id: version
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Package VSIX
+        shell: bash
+        run: pnpx @vscode/vsce@3.9.2 package --no-dependencies --out "release-assets/onlyfile-${{ steps.version.outputs.value }}.vsix"
+
+      - name: Verify bundled assets
+        shell: bash
+        run: |
+          assets=(
+            only-lsp-darwin-arm64
+            only-lsp-darwin-x64
+            only-lsp-linux-arm64
+            only-lsp-linux-x64
+            only-lsp-win32-arm64.exe
+            only-lsp-win32-x64.exe
+          )
+          for asset in "${assets[@]}"; do
+            unzip -l "release-assets/onlyfile-${{ steps.version.outputs.value }}.vsix" | grep -F "extension/lsp/$asset"
+          done
+
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: onlyfile-v${{ steps.version.outputs.value }}
+          path: release-assets/*
+
+  publish:
+    needs: package
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download workflow artifacts
+      - name: Download release assets
         uses: actions/download-artifact@v4
         with:
-          path: dist
-          merge-multiple: true
+          name: onlyfile-v${{ needs.package.outputs.version }}
+          path: release-assets
 
-      - name: Generate release tag
-        id: tag
-        run: echo "value=lsp-$(date -u +'%Y%m%d-%H%M%S')" >> "$GITHUB_OUTPUT"
-
-      - name: Publish release assets
+      - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.value }}
-          name: ${{ steps.tag.outputs.value }}
+          tag_name: v${{ needs.package.outputs.version }}
+          name: Onlyfile v${{ needs.package.outputs.version }}
           generate_release_notes: false
-          files: dist/*
+          files: release-assets/*

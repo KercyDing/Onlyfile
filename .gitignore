@@ -1,3 +1,5 @@
 node_modules/
 out/
 *.vsix
+lsp/*
+!lsp/.gitkeep

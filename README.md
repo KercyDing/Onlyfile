@@ -13,18 +13,16 @@ Current features:
 The extension resolves the language server in this order:
 
 1. `ONLY_LSP_BIN`
-2. cached `only-lsp` downloaded from the latest `KercyDing/Onlyfile` GitHub release
+2. `ONLY_LSP_DIR`
+3. the matching `only-lsp` binary bundled in the extension
 
-On first launch, the extension downloads the matching `only-lsp` binary for the current platform from GitHub Releases and caches it in the VS Code global storage directory. If the download fails, check the `Onlyfile` output channel.
+The published VSIX contains binaries for macOS, Linux, and Windows on x64 and ARM64. The extension does not download executables at runtime. If the current platform binary is absent, syntax highlighting remains available but the language server is not started.
 
 ## Command palette
 
 The extension provides these commands in the VS Code command palette:
 
 - `Onlyfile: Restart LSP` — restarts the running language server
-- `Onlyfile: Reinstall LSP` — re-downloads the managed `only-lsp` binary and restarts the language server
-
-If `ONLY_LSP_BIN` is set, it still takes precedence after reinstalling.
 
 ## Local development
 
@@ -33,8 +31,18 @@ If `ONLY_LSP_BIN` is set, it still takes precedence after reinstalling.
 3. Press `F5` in VS Code to launch an Extension Development Host
 4. Open an `Onlyfile` or `onlyfile` file
 
-To use a local language server binary during development:
+To use a local language server build directory during development:
+
+```bash
+ONLY_LSP_DIR=/absolute/path/to/only/target/release code .
+```
+
+An exact binary path is also supported:
 
 ```bash
 ONLY_LSP_BIN=/absolute/path/to/only-lsp code .
 ```
+
+## Packaging
+
+The `package.yml` workflow builds all six supported `only-lsp` binaries, embeds them in the VSIX, and publishes the VSIX together with the standalone binaries and SHA256 files in the GitHub release for the extension version.

@@ -3388,8 +3388,8 @@ var require_main2 = __commonJS({
         }
         uinteger2.is = is;
       })(uinteger || (exports3.uinteger = uinteger = {}));
-      var Position2;
-      (function(Position3) {
+      var Position;
+      (function(Position2) {
         function create(line, character) {
           if (line === Number.MAX_VALUE) {
             line = uinteger.MAX_VALUE;
@@ -3399,19 +3399,19 @@ var require_main2 = __commonJS({
           }
           return { line, character };
         }
-        Position3.create = create;
+        Position2.create = create;
         function is(value) {
           var candidate = value;
           return Is.objectLiteral(candidate) && Is.uinteger(candidate.line) && Is.uinteger(candidate.character);
         }
-        Position3.is = is;
-      })(Position2 || (exports3.Position = Position2 = {}));
+        Position2.is = is;
+      })(Position || (exports3.Position = Position = {}));
       var Range;
       (function(Range2) {
         function create(one, two, three, four) {
           if (Is.uinteger(one) && Is.uinteger(two) && Is.uinteger(three) && Is.uinteger(four)) {
-            return { start: Position2.create(one, two), end: Position2.create(three, four) };
-          } else if (Position2.is(one) && Position2.is(two)) {
+            return { start: Position.create(one, two), end: Position.create(three, four) };
+          } else if (Position.is(one) && Position.is(two)) {
             return { start: one, end: two };
           } else {
             throw new Error("Range#create called with invalid arguments[".concat(one, ", ").concat(two, ", ").concat(three, ", ").concat(four, "]"));
@@ -3420,7 +3420,7 @@ var require_main2 = __commonJS({
         Range2.create = create;
         function is(value) {
           var candidate = value;
-          return Is.objectLiteral(candidate) && Position2.is(candidate.start) && Position2.is(candidate.end);
+          return Is.objectLiteral(candidate) && Position.is(candidate.start) && Position.is(candidate.end);
         }
         Range2.is = is;
       })(Range || (exports3.Range = Range = {}));
@@ -3757,8 +3757,8 @@ var require_main2 = __commonJS({
         }
         DeleteFile2.is = is;
       })(DeleteFile || (exports3.DeleteFile = DeleteFile = {}));
-      var WorkspaceEdit2;
-      (function(WorkspaceEdit3) {
+      var WorkspaceEdit;
+      (function(WorkspaceEdit2) {
         function is(value) {
           var candidate = value;
           return candidate && (candidate.changes !== void 0 || candidate.documentChanges !== void 0) && (candidate.documentChanges === void 0 || candidate.documentChanges.every(function(change) {
@@ -3769,8 +3769,8 @@ var require_main2 = __commonJS({
             }
           }));
         }
-        WorkspaceEdit3.is = is;
-      })(WorkspaceEdit2 || (exports3.WorkspaceEdit = WorkspaceEdit2 = {}));
+        WorkspaceEdit2.is = is;
+      })(WorkspaceEdit || (exports3.WorkspaceEdit = WorkspaceEdit = {}));
       var TextEditChangeImpl = (
         /** @class */
         (function() {
@@ -4343,18 +4343,18 @@ var require_main2 = __commonJS({
         }
         DocumentSymbol2.is = is;
       })(DocumentSymbol || (exports3.DocumentSymbol = DocumentSymbol = {}));
-      var CodeActionKind2;
-      (function(CodeActionKind3) {
-        CodeActionKind3.Empty = "";
-        CodeActionKind3.QuickFix = "quickfix";
-        CodeActionKind3.Refactor = "refactor";
-        CodeActionKind3.RefactorExtract = "refactor.extract";
-        CodeActionKind3.RefactorInline = "refactor.inline";
-        CodeActionKind3.RefactorRewrite = "refactor.rewrite";
-        CodeActionKind3.Source = "source";
-        CodeActionKind3.SourceOrganizeImports = "source.organizeImports";
-        CodeActionKind3.SourceFixAll = "source.fixAll";
-      })(CodeActionKind2 || (exports3.CodeActionKind = CodeActionKind2 = {}));
+      var CodeActionKind;
+      (function(CodeActionKind2) {
+        CodeActionKind2.Empty = "";
+        CodeActionKind2.QuickFix = "quickfix";
+        CodeActionKind2.Refactor = "refactor";
+        CodeActionKind2.RefactorExtract = "refactor.extract";
+        CodeActionKind2.RefactorInline = "refactor.inline";
+        CodeActionKind2.RefactorRewrite = "refactor.rewrite";
+        CodeActionKind2.Source = "source";
+        CodeActionKind2.SourceOrganizeImports = "source.organizeImports";
+        CodeActionKind2.SourceFixAll = "source.fixAll";
+      })(CodeActionKind || (exports3.CodeActionKind = CodeActionKind = {}));
       var CodeActionTriggerKind;
       (function(CodeActionTriggerKind2) {
         CodeActionTriggerKind2.Invoked = 1;
@@ -4379,8 +4379,8 @@ var require_main2 = __commonJS({
         }
         CodeActionContext2.is = is;
       })(CodeActionContext || (exports3.CodeActionContext = CodeActionContext = {}));
-      var CodeAction2;
-      (function(CodeAction3) {
+      var CodeAction;
+      (function(CodeAction2) {
         function create(title, kindOrCommandOrEdit, kind) {
           var result = { title };
           var checkKind = true;
@@ -4397,13 +4397,13 @@ var require_main2 = __commonJS({
           }
           return result;
         }
-        CodeAction3.create = create;
+        CodeAction2.create = create;
         function is(value) {
           var candidate = value;
-          return candidate && Is.string(candidate.title) && (candidate.diagnostics === void 0 || Is.typedArray(candidate.diagnostics, Diagnostic.is)) && (candidate.kind === void 0 || Is.string(candidate.kind)) && (candidate.edit !== void 0 || candidate.command !== void 0) && (candidate.command === void 0 || Command.is(candidate.command)) && (candidate.isPreferred === void 0 || Is.boolean(candidate.isPreferred)) && (candidate.edit === void 0 || WorkspaceEdit2.is(candidate.edit));
+          return candidate && Is.string(candidate.title) && (candidate.diagnostics === void 0 || Is.typedArray(candidate.diagnostics, Diagnostic.is)) && (candidate.kind === void 0 || Is.string(candidate.kind)) && (candidate.edit !== void 0 || candidate.command !== void 0) && (candidate.command === void 0 || Command.is(candidate.command)) && (candidate.isPreferred === void 0 || Is.boolean(candidate.isPreferred)) && (candidate.edit === void 0 || WorkspaceEdit.is(candidate.edit));
         }
-        CodeAction3.is = is;
-      })(CodeAction2 || (exports3.CodeAction = CodeAction2 = {}));
+        CodeAction2.is = is;
+      })(CodeAction || (exports3.CodeAction = CodeAction = {}));
       var CodeLens;
       (function(CodeLens2) {
         function create(range, data) {
@@ -4584,7 +4584,7 @@ var require_main2 = __commonJS({
         InlayHint2.create = create;
         function is(value) {
           var candidate = value;
-          return Is.objectLiteral(candidate) && Position2.is(candidate.position) && (Is.string(candidate.label) || Is.typedArray(candidate.label, InlayHintLabelPart.is)) && (candidate.kind === void 0 || InlayHintKind.is(candidate.kind)) && candidate.textEdits === void 0 || Is.typedArray(candidate.textEdits, TextEdit.is) && (candidate.tooltip === void 0 || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip)) && (candidate.paddingLeft === void 0 || Is.boolean(candidate.paddingLeft)) && (candidate.paddingRight === void 0 || Is.boolean(candidate.paddingRight));
+          return Is.objectLiteral(candidate) && Position.is(candidate.position) && (Is.string(candidate.label) || Is.typedArray(candidate.label, InlayHintLabelPart.is)) && (candidate.kind === void 0 || InlayHintKind.is(candidate.kind)) && candidate.textEdits === void 0 || Is.typedArray(candidate.textEdits, TextEdit.is) && (candidate.tooltip === void 0 || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip)) && (candidate.paddingLeft === void 0 || Is.boolean(candidate.paddingLeft)) && (candidate.paddingRight === void 0 || Is.boolean(candidate.paddingRight));
         }
         InlayHint2.is = is;
       })(InlayHint || (exports3.InlayHint = InlayHint = {}));
@@ -4773,7 +4773,7 @@ var require_main2 = __commonJS({
             var lineOffsets = this.getLineOffsets();
             var low = 0, high = lineOffsets.length;
             if (high === 0) {
-              return Position2.create(0, offset);
+              return Position.create(0, offset);
             }
             while (low < high) {
               var mid = Math.floor((low + high) / 2);
@@ -4784,7 +4784,7 @@ var require_main2 = __commonJS({
               }
             }
             var line = low - 1;
-            return Position2.create(line, offset - lineOffsets[line]);
+            return Position.create(line, offset - lineOffsets[line]);
           };
           FullTextDocument2.prototype.offsetAt = function(position) {
             var lineOffsets = this.getLineOffsets();
@@ -17649,19 +17649,19 @@ var require_main4 = __commonJS({
       constructor(arg1, arg2, arg3, arg4, arg5) {
         let id;
         let name;
-        let serverOptions;
+        let serverOptions2;
         let clientOptions;
         let forceDebug;
         if (Is.string(arg2)) {
           id = arg1;
           name = arg2;
-          serverOptions = arg3;
+          serverOptions2 = arg3;
           clientOptions = arg4;
           forceDebug = !!arg5;
         } else {
           id = arg1.toLowerCase();
           name = arg1;
-          serverOptions = arg2;
+          serverOptions2 = arg2;
           clientOptions = arg3;
           forceDebug = arg4;
         }
@@ -17669,7 +17669,7 @@ var require_main4 = __commonJS({
           forceDebug = false;
         }
         super(id, name, clientOptions);
-        this._serverOptions = serverOptions;
+        this._serverOptions = serverOptions2;
         this._forceDebug = forceDebug;
         this._isInDebugMode = forceDebug;
         try {
@@ -18113,8 +18113,6 @@ var fs = __toESM(require("node:fs"));
 var path = __toESM(require("node:path"));
 var vscode = __toESM(require("vscode"));
 var import_node = __toESM(require_node3());
-var ONLY_RELEASE_API = "https://api.github.com/repos/KercyDing/Onlyfile/releases/latest";
-var DOWNLOAD_TIMEOUT_MS = 3e4;
 var client;
 var outputChannel;
 async function activate(context) {
@@ -18137,7 +18135,6 @@ async function activate(context) {
     })
   );
   registerCommands(context, output);
-  registerVersionSourceAction(context);
   await startLanguageClient(context, output);
 }
 async function deactivate() {
@@ -18164,74 +18161,15 @@ function registerCommands(context, output) {
           }
         }
       );
-    }),
-    vscode.commands.registerCommand("onlyfile.reinstallLsp", async () => {
-      const explicitBinary = process.env.ONLY_LSP_BIN;
-      const downloaded = await downloadManagedBinary(context, output, { forceRedownload: true });
-      if (!downloaded) {
-        return;
-      }
-      await restartLanguageClient(context, output);
-      if (explicitBinary && fs.existsSync(explicitBinary)) {
-        void vscode.window.showInformationMessage(
-          `Reinstalled bundled only-lsp, but ONLY_LSP_BIN is still preferred: ${explicitBinary}`
-        );
-      } else {
-        void vscode.window.showInformationMessage("Reinstalled only-lsp successfully.");
-      }
     })
   );
 }
-function registerVersionSourceAction(context) {
-  const languageVersion = extensionLanguageVersion(context);
-  if (!languageVersion) {
-    return;
-  }
-  context.subscriptions.push(
-    vscode.languages.registerCodeActionsProvider(
-      "onlyfile",
-      {
-        provideCodeActions(document) {
-          if (/^\s*!version(?:\s|$)/m.test(document.getText())) {
-            return [];
-          }
-          const action = new vscode.CodeAction(
-            `Insert !version ${languageVersion}`,
-            vscode.CodeActionKind.Source
-          );
-          const edit = new vscode.WorkspaceEdit();
-          const firstLine = document.lineAt(0).text;
-          const insertAt = new vscode.Position(0, firstLine.startsWith("\uFEFF") ? 1 : 0);
-          edit.insert(document.uri, insertAt, `!version ${languageVersion}
-
-`);
-          action.edit = edit;
-          return [action];
-        }
-      },
-      {
-        providedCodeActionKinds: [vscode.CodeActionKind.Source]
-      }
-    )
-  );
-}
-function extensionLanguageVersion(context) {
-  const packageJson = context.extension.packageJSON;
-  if (typeof packageJson.version !== "string") {
-    return void 0;
-  }
-  const match = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\./.exec(packageJson.version);
-  if (!match || match[1] === "0" && match[2] === "0") {
-    return void 0;
-  }
-  return `${match[1]}.${match[2]}`;
-}
-async function startLanguageClient(context, output, options) {
-  const serverOptions = await resolveServerOptions(context, output, options);
-  if (!serverOptions) {
-    const message = "Onlyfile LSP server was not found. Set ONLY_LSP_BIN or check the Onlyfile output channel.";
+async function startLanguageClient(context, output) {
+  const serverOptions2 = await resolveServerOptions(context, output);
+  if (!serverOptions2) {
+    const message = "Onlyfile LSP is unavailable for this platform. Set ONLY_LSP_DIR or ONLY_LSP_BIN to use a local server.";
     output.appendLine(message);
-    void vscode.window.showErrorMessage(message);
+    void vscode.window.showWarningMessage(message);
     return false;
   }
   const clientOptions = {
@@ -18246,7 +18184,7 @@ async function startLanguageClient(context, output, options) {
   client = new import_node.LanguageClient(
     "onlyfile-lsp",
     "Onlyfile Language Server",
-    serverOptions,
+    serverOptions2,
     clientOptions
   );
   output.appendLine("Starting Onlyfile language client.");
@@ -18273,171 +18211,81 @@ async function stopLanguageClient(output) {
   client = void 0;
   output.appendLine("Onlyfile language client stopped.");
 }
-async function restartLanguageClient(context, output, options) {
+async function restartLanguageClient(context, output) {
   output.appendLine("Restarting Onlyfile language client.");
   await stopLanguageClient(output);
-  return await startLanguageClient(context, output, options);
+  return await startLanguageClient(context, output);
 }
-async function resolveServerOptions(context, output, options) {
+async function resolveServerOptions(context, output) {
   const explicitBinary = process.env.ONLY_LSP_BIN;
-  if (explicitBinary && fs.existsSync(explicitBinary)) {
-    output.appendLine(`Using ONLY_LSP_BIN: ${explicitBinary}`);
-    const executable = toExecutable(explicitBinary, []);
-    return { run: executable, debug: executable };
-  }
-  const cachedBinary = await resolveCachedBinary(context, output, options);
-  if (cachedBinary) {
-    output.appendLine(`Using downloaded only-lsp binary: ${cachedBinary}`);
-    const executable = toExecutable(cachedBinary, []);
-    return { run: executable, debug: executable };
-  }
-  output.appendLine("No only-lsp server executable was found.");
-  return void 0;
-}
-async function downloadManagedBinary(context, output, options) {
-  const platformId = currentPlatformId();
-  if (!platformId) {
-    output.appendLine(
-      `Unsupported platform for only-lsp download: ${process.platform}-${process.arch}`
-    );
-    return void 0;
-  }
-  const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
-  const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
-  const versionPath = path.join(cacheDir, "version.json");
-  try {
-    await fs.promises.mkdir(cacheDir, { recursive: true });
-    if (options?.forceRedownload) {
-      output.appendLine(`Removing cached only-lsp for ${platformId}.`);
-      await fs.promises.rm(binaryPath, { force: true });
-      await fs.promises.rm(versionPath, { force: true });
+  if (explicitBinary) {
+    const resolved2 = await prepareBinary(explicitBinary, output, "ONLY_LSP_BIN");
+    if (resolved2) {
+      return serverOptions(resolved2);
     }
-    return await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Onlyfile",
-        cancellable: false
-      },
-      async (progress) => {
-        progress.report({ message: "Resolving latest only-lsp release..." });
-        const release = await fetchLatestRelease();
-        const asset = release.assets.find((candidate) => candidate.name === assetName(platformId));
-        if (!asset) {
-          output.appendLine(`No only-lsp asset for ${platformId} in ${release.tag_name}.`);
-          return void 0;
-        }
-        output.appendLine(
-          `Downloading only-lsp ${release.tag_name} from GitHub for ${platformId}.`
-        );
-        progress.report({ message: "Downloading only-lsp from GitHub..." });
-        await downloadFile(asset.browser_download_url, binaryPath);
-        progress.report({ message: "Installing only-lsp..." });
-        await ensureExecutable(binaryPath);
-        await fs.promises.writeFile(
-          versionPath,
-          `${JSON.stringify(
-            {
-              version: release.tag_name,
-              asset: asset.name,
-              extensionVersion: extensionReleaseTag(context)
-            },
-            null,
-            2
-          )}
-`,
-          "utf8"
-        );
-        return binaryPath;
+  }
+  const explicitDirectory = process.env.ONLY_LSP_DIR;
+  if (explicitDirectory) {
+    for (const candidate of localDirectoryCandidates(explicitDirectory)) {
+      const resolved2 = await prepareBinary(candidate, output, "ONLY_LSP_DIR");
+      if (resolved2) {
+        return serverOptions(resolved2);
       }
-    );
-  } catch (error) {
-    const message = downloadFailureMessage(error);
-    output.appendLine(`Failed to download only-lsp from GitHub: ${message}`);
-    void vscode.window.showWarningMessage(`Unable to download only-lsp from GitHub. ${message}`);
-    return void 0;
+    }
+    output.appendLine(`ONLY_LSP_DIR has no server for this platform: ${explicitDirectory}`);
   }
-}
-async function resolveCachedBinary(context, output, options) {
   const platformId = currentPlatformId();
   if (!platformId) {
-    output.appendLine(
-      `Unsupported platform for only-lsp download: ${process.platform}-${process.arch}`
-    );
+    output.appendLine(`Unsupported only-lsp platform: ${process.platform}-${process.arch}`);
     return void 0;
   }
-  const cacheDir = path.join(context.globalStorageUri.fsPath, "lsp", platformId);
-  const binaryPath = path.join(cacheDir, binaryName("only-lsp"));
-  const versionPath = path.join(cacheDir, "version.json");
-  if (!options?.forceRedownload && fs.existsSync(binaryPath)) {
-    const metadata = await readCachedBinaryMetadata(versionPath);
-    const minimumVersion = extensionReleaseTag(context);
-    if (!isCachedBinaryCurrent(metadata, minimumVersion, assetName(platformId))) {
-      output.appendLine(
-        `Cached only-lsp is stale or missing metadata; expected at least ${minimumVersion}.`
-      );
-      return await downloadManagedBinary(context, output, { forceRedownload: true });
-    }
-    await ensureExecutable(binaryPath);
-    return binaryPath;
+  const bundledBinary = context.asAbsolutePath(path.join("lsp", assetName(platformId)));
+  const resolved = await prepareBinary(bundledBinary, output, "bundled only-lsp");
+  if (resolved) {
+    return serverOptions(resolved);
   }
-  return await downloadManagedBinary(context, output, options);
-}
-async function readCachedBinaryMetadata(versionPath) {
-  try {
-    return JSON.parse(await fs.promises.readFile(versionPath, "utf8"));
-  } catch {
-    return void 0;
-  }
-}
-function isCachedBinaryCurrent(metadata, minimumVersion, expectedAsset) {
-  if (!metadata?.version || metadata.asset !== expectedAsset) {
-    return false;
-  }
-  return metadata.extensionVersion === minimumVersion;
-}
-function extensionReleaseTag(context) {
-  const packageJson = context.extension.packageJSON;
-  const version = typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
-  return version.startsWith("v") ? version : `v${version}`;
-}
-async function fetchLatestRelease() {
-  const response = await fetch(ONLY_RELEASE_API, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "kercyding.onlyfile-vscode"
-    },
-    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS)
-  });
-  if (!response.ok) {
-    throw new Error(`GitHub release request failed: ${response.status} ${response.statusText}`);
-  }
-  return await response.json();
-}
-async function downloadFile(url, destination) {
-  const response = await fetch(url, {
-    headers: { "User-Agent": "kercyding.onlyfile-vscode" },
-    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS)
-  });
-  if (!response.ok) {
-    throw new Error(`only-lsp download failed: ${response.status} ${response.statusText}`);
-  }
-  const buffer = Buffer.from(await response.arrayBuffer());
-  await fs.promises.writeFile(destination, buffer);
+  output.appendLine(`Bundled only-lsp is missing for ${platformId}: ${bundledBinary}`);
+  return void 0;
 }
 async function ensureExecutable(filePath) {
   if (process.platform !== "win32") {
     await fs.promises.chmod(filePath, 493);
   }
 }
-function downloadFailureMessage(error) {
-  const message = error instanceof Error ? error.message : String(error);
-  if (/timed out|timeout/i.test(message)) {
-    return "The download timed out. Please check your network connection and try again.";
+async function prepareBinary(filePath, output, source) {
+  if (!isFile(filePath)) {
+    if (source === "ONLY_LSP_BIN") {
+      output.appendLine(`ONLY_LSP_BIN does not point to a file: ${filePath}`);
+    }
+    return void 0;
   }
-  if (/fetch failed|ENOTFOUND|ECONNREFUSED|ECONNRESET|EHOSTUNREACH|network/i.test(message)) {
-    return "A network error occurred while reaching GitHub. Please check your connection and try again.";
+  try {
+    await ensureExecutable(filePath);
+  } catch (error) {
+    output.appendLine(`Cannot prepare ${source} at ${filePath}: ${String(error)}`);
+    return void 0;
   }
-  return "Please check your network connection or set ONLY_LSP_BIN manually.";
+  output.appendLine(`Using ${source}: ${filePath}`);
+  return filePath;
+}
+function isFile(filePath) {
+  try {
+    return fs.statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+}
+function localDirectoryCandidates(directory) {
+  const candidates = [path.join(directory, binaryName("only-lsp"))];
+  const platformId = currentPlatformId();
+  if (platformId) {
+    candidates.push(path.join(directory, assetName(platformId)));
+  }
+  return [...new Set(candidates)];
+}
+function serverOptions(command) {
+  const executable = toExecutable(command, []);
+  return { run: executable, debug: executable };
 }
 function currentPlatformId() {
   if (process.platform === "darwin" && process.arch === "arm64") {

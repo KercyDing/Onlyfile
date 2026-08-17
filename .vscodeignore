@@ -10,3 +10,5 @@ pnpm-lock.yaml
 media/icon.svg
 .github/**
 .claude/**
+lsp/.gitkeep
+lsp/*.sha256
