@@ -31,12 +31,13 @@
     },
     "namespace": {
       "name": "meta.namespace.onlyfile",
-      "match": "^(\\s*)(\\[)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)(\\{)?(\\s*)$",
+      "match": "^(\\s*)(?:(namespace)(\\s+))?(\\[)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)(\\{)?(\\s*)$",
       "captures": {
-        "2": { "name": "punctuation.section.brackets.begin.onlyfile" },
-        "3": { "name": "entity.name.namespace.onlyfile" },
-        "4": { "name": "punctuation.section.brackets.end.onlyfile" },
-        "6": { "name": "punctuation.section.braces.begin.onlyfile" }
+        "2": { "name": "storage.type.namespace.onlyfile" },
+        "4": { "name": "punctuation.section.brackets.begin.onlyfile" },
+        "5": { "name": "entity.name.type.namespace.onlyfile" },
+        "6": { "name": "punctuation.section.brackets.end.onlyfile" },
+        "8": { "name": "punctuation.section.braces.begin.onlyfile" }
       }
     },
     "namespaceClose": {
@@ -107,9 +108,12 @@
           "match": "(?<=@)[A-Za-z_-][A-Za-z0-9_-]*"
         },
         {
-          "match": "\\b(shell~=|shell=)(?=\\S)",
+          "match": "\\b(shell~=|shell=)([A-Za-z_-][A-Za-z0-9_-]*)",
           "captures": {
             "1": {
+              "name": "keyword.control.guard.onlyfile"
+            },
+            "2": {
               "name": "keyword.control.guard.onlyfile"
             }
           }

@@ -18120,24 +18120,7 @@ async function activate(context) {
   outputChannel = output;
   context.subscriptions.push(output);
   output.appendLine("Activating Onlyfile extension.");
-  context.subscriptions.push(
-    vscode.languages.setLanguageConfiguration("onlyfile", {
-      comments: { lineComment: "//" },
-      brackets: [
-        ["[", "]"],
-        ["(", ")"],
-        ["{", "}"]
-      ],
-      autoClosingPairs: [
-        { open: "[", close: "]" },
-        { open: "(", close: ")" },
-        { open: "{", close: "}" },
-        { open: '"', close: '"' }
-      ]
-    })
-  );
   registerCommands(context, output);
-  registerNamespaceSnippet(context);
   await startLanguageClient(context, output);
 }
 async function deactivate() {
@@ -18164,28 +18147,6 @@ function registerCommands(context, output) {
           }
         }
       );
-    })
-  );
-}
-function registerNamespaceSnippet(context) {
-  context.subscriptions.push(
-    vscode.commands.registerCommand("onlyfile.insertNamespace", async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
-      const atLineStart = editor.selections.every((selection) => {
-        if (!selection.isEmpty) {
-          return false;
-        }
-        const prefix = editor.document.lineAt(selection.active.line).text.slice(0, selection.active.character);
-        return prefix.trim().length === 0;
-      });
-      if (!atLineStart) {
-        await vscode.commands.executeCommand("default:type", { text: "[" });
-        return;
-      }
-      await editor.insertSnippet(new vscode.SnippetString("[$1] {$0}"));
     })
   );
 }
