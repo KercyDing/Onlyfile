@@ -5,6 +5,7 @@
     { "include": "#docComment" },
     { "include": "#lineComment" },
     { "include": "#namespace" },
+    { "include": "#namespaceClose" },
     { "include": "#versionDirective" },
     { "include": "#variableDirective" },
     { "include": "#directive" },
@@ -30,12 +31,19 @@
     },
     "namespace": {
       "name": "meta.namespace.onlyfile",
-      "match": "^(\\s*)(\\[)(/?)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)$",
+      "match": "^(\\s*)(\\[)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)(\\{)?(\\s*)$",
       "captures": {
         "2": { "name": "punctuation.section.brackets.begin.onlyfile" },
-        "3": { "name": "keyword.operator.namespace.close.onlyfile" },
-        "4": { "name": "entity.name.namespace.onlyfile" },
-        "5": { "name": "punctuation.section.brackets.end.onlyfile" }
+        "3": { "name": "entity.name.namespace.onlyfile" },
+        "4": { "name": "punctuation.section.brackets.end.onlyfile" },
+        "6": { "name": "punctuation.section.braces.begin.onlyfile" }
+      }
+    },
+    "namespaceClose": {
+      "name": "meta.namespace.onlyfile",
+      "match": "^(\\s*)(\\})(\\s*)$",
+      "captures": {
+        "2": { "name": "punctuation.section.braces.end.onlyfile" }
       }
     },
     "variableDirective": {

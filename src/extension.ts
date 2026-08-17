@@ -26,10 +26,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       brackets: [
         ["[", "]"],
         ["(", ")"],
+        ["{", "}"],
       ],
       autoClosingPairs: [
         { open: "[", close: "]" },
         { open: "(", close: ")" },
+        { open: "{", close: "}" },
         { open: '"', close: '"' },
       ],
     }),

@@ -18125,11 +18125,13 @@ async function activate(context) {
       comments: { lineComment: "//" },
       brackets: [
         ["[", "]"],
-        ["(", ")"]
+        ["(", ")"],
+        ["{", "}"]
       ],
       autoClosingPairs: [
         { open: "[", close: "]" },
         { open: "(", close: ")" },
+        { open: "{", close: "}" },
         { open: '"', close: '"' }
       ]
     })
