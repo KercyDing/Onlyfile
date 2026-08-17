@@ -70,9 +70,6 @@
       }
     ]
   },
-  "activationEvents": [
-    "onLanguage:onlyfile"
-  ],
   "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.99.0"
