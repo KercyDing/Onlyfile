@@ -1,0 +1,11 @@
+{
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*\\|(?:[ \\t].*)?$",
+      "action": {
+        "indentAction": 0,
+        "appendText": "| "
+      }
+    }
+  ]
+}

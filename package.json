@@ -58,7 +58,8 @@
         "filenames": [
           "Onlyfile",
           "onlyfile"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
