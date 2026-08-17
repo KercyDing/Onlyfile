@@ -2,6 +2,13 @@
   "onEnterRules": [
     {
       "beforeText": "^\\s*\\[[A-Za-z_-][A-Za-z0-9_-]*\\]\\s*\\{\\s*$",
+      "afterText": "^\\s*\\}",
+      "action": {
+        "indent": "indentOutdent"
+      }
+    },
+    {
+      "beforeText": "^\\s*\\[[A-Za-z_-][A-Za-z0-9_-]*\\]\\s*\\{\\s*$",
       "action": {
         "indent": "indent"
       }

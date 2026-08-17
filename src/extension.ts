@@ -38,6 +38,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   registerCommands(context, output);
+  registerNamespaceSnippet(context);
   await startLanguageClient(context, output);
 }
 
@@ -67,6 +68,33 @@ function registerCommands(context: vscode.ExtensionContext, output: vscode.Outpu
           }
         },
       );
+    }),
+  );
+}
+
+function registerNamespaceSnippet(context: vscode.ExtensionContext): void {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("onlyfile.insertNamespace", async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+
+      const atLineStart = editor.selections.every((selection) => {
+        if (!selection.isEmpty) {
+          return false;
+        }
+        const prefix = editor.document
+          .lineAt(selection.active.line)
+          .text.slice(0, selection.active.character);
+        return prefix.trim().length === 0;
+      });
+      if (!atLineStart) {
+        await vscode.commands.executeCommand("default:type", { text: "[" });
+        return;
+      }
+
+      await editor.insertSnippet(new vscode.SnippetString("[$1] {$0}"));
     }),
   );
 }

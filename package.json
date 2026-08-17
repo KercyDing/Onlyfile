@@ -37,6 +37,13 @@
     "vscode-languageclient": "^9.0.1"
   },
   "contributes": {
+    "keybindings": [
+      {
+        "command": "onlyfile.insertNamespace",
+        "key": "[",
+        "when": "editorTextFocus && editorLangId == onlyfile"
+      }
+    ],
     "commands": [
       {
         "command": "onlyfile.restartLsp",
