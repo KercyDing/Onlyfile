@@ -9,8 +9,7 @@
     { "include": "#directive" },
     { "include": "#taskHeader" },
     { "include": "#commandBlock" },
-    { "include": "#interpolation" },
-    { "include": "#string" }
+    { "include": "#interpolation" }
   ],
   "repository": {
     "docComment": {
@@ -108,28 +107,34 @@
       "name": "meta.command.block.onlyfile",
       "begin": "^(\\s*)(\\|)(?=[ \\t]|$)",
       "beginCaptures": {
-        "2": { "name": "punctuation.definition.block.onlyfile" }
+        "2": { "name": "keyword.control.command-block.onlyfile" }
       },
       "end": "$",
-      "contentName": "string.unquoted.command.block.onlyfile",
+      "contentName": "meta.command.block.content.onlyfile",
       "patterns": [
-        { "include": "#interpolation" },
-        { "include": "#string" }
+        { "include": "#commandBlockComment" },
+        { "include": "#interpolation" }
       ]
     },
+    "commandBlockComment": {
+      "match": "(?<=\\|)[ \\t]+(#.*)$",
+      "captures": {
+        "1": { "name": "comment.line.number-sign.command-block.onlyfile" }
+      }
+    },
     "interpolation": {
-      "name": "meta.interpolation.onlyfile",
+      "name": "constant.character.escape.interpolation.onlyfile",
       "begin": "\\{\\{",
       "beginCaptures": {
-        "0": { "name": "punctuation.definition.interpolation.begin.onlyfile" }
+        "0": { "name": "constant.character.escape.interpolation.onlyfile" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "punctuation.definition.interpolation.end.onlyfile" }
+        "0": { "name": "constant.character.escape.interpolation.onlyfile" }
       },
       "patterns": [
         {
-          "name": "variable.parameter.interpolation.onlyfile",
+          "name": "constant.character.escape.interpolation.onlyfile",
           "match": "[A-Za-z_-][A-Za-z0-9_-]*"
         }
       ]
