@@ -59,6 +59,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   registerCommands(context, output);
+  registerVersionSourceAction(context);
   await startLanguageClient(context, output);
 }
 
@@ -105,6 +106,53 @@ function registerCommands(context: vscode.ExtensionContext, output: vscode.Outpu
       }
     }),
   );
+}
+
+function registerVersionSourceAction(context: vscode.ExtensionContext): void {
+  const languageVersion = extensionLanguageVersion(context);
+  if (!languageVersion) {
+    return;
+  }
+
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider(
+      "onlyfile",
+      {
+        provideCodeActions(document): vscode.CodeAction[] {
+          if (/^\s*!version(?:\s|$)/m.test(document.getText())) {
+            return [];
+          }
+
+          const action = new vscode.CodeAction(
+            `Insert !version ${languageVersion}`,
+            vscode.CodeActionKind.Source,
+          );
+          const edit = new vscode.WorkspaceEdit();
+          const firstLine = document.lineAt(0).text;
+          const insertAt = new vscode.Position(0, firstLine.startsWith("\u{feff}") ? 1 : 0);
+          edit.insert(document.uri, insertAt, `!version ${languageVersion}\n\n`);
+          action.edit = edit;
+          return [action];
+        },
+      },
+      {
+        providedCodeActionKinds: [vscode.CodeActionKind.Source],
+      },
+    ),
+  );
+}
+
+function extensionLanguageVersion(context: vscode.ExtensionContext): string | undefined {
+  const packageJson = context.extension.packageJSON as { version?: unknown };
+  if (typeof packageJson.version !== "string") {
+    return undefined;
+  }
+
+  const match = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\./.exec(packageJson.version);
+  if (!match || (match[1] === "0" && match[2] === "0")) {
+    return undefined;
+  }
+  return `${match[1]}.${match[2]}`;
 }
 
 async function startLanguageClient(

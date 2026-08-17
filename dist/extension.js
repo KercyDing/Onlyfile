@@ -3388,8 +3388,8 @@ var require_main2 = __commonJS({
         }
         uinteger2.is = is;
       })(uinteger || (exports3.uinteger = uinteger = {}));
-      var Position;
-      (function(Position2) {
+      var Position2;
+      (function(Position3) {
         function create(line, character) {
           if (line === Number.MAX_VALUE) {
             line = uinteger.MAX_VALUE;
@@ -3399,19 +3399,19 @@ var require_main2 = __commonJS({
           }
           return { line, character };
         }
-        Position2.create = create;
+        Position3.create = create;
         function is(value) {
           var candidate = value;
           return Is.objectLiteral(candidate) && Is.uinteger(candidate.line) && Is.uinteger(candidate.character);
         }
-        Position2.is = is;
-      })(Position || (exports3.Position = Position = {}));
+        Position3.is = is;
+      })(Position2 || (exports3.Position = Position2 = {}));
       var Range;
       (function(Range2) {
         function create(one, two, three, four) {
           if (Is.uinteger(one) && Is.uinteger(two) && Is.uinteger(three) && Is.uinteger(four)) {
-            return { start: Position.create(one, two), end: Position.create(three, four) };
-          } else if (Position.is(one) && Position.is(two)) {
+            return { start: Position2.create(one, two), end: Position2.create(three, four) };
+          } else if (Position2.is(one) && Position2.is(two)) {
             return { start: one, end: two };
           } else {
             throw new Error("Range#create called with invalid arguments[".concat(one, ", ").concat(two, ", ").concat(three, ", ").concat(four, "]"));
@@ -3420,7 +3420,7 @@ var require_main2 = __commonJS({
         Range2.create = create;
         function is(value) {
           var candidate = value;
-          return Is.objectLiteral(candidate) && Position.is(candidate.start) && Position.is(candidate.end);
+          return Is.objectLiteral(candidate) && Position2.is(candidate.start) && Position2.is(candidate.end);
         }
         Range2.is = is;
       })(Range || (exports3.Range = Range = {}));
@@ -3757,8 +3757,8 @@ var require_main2 = __commonJS({
         }
         DeleteFile2.is = is;
       })(DeleteFile || (exports3.DeleteFile = DeleteFile = {}));
-      var WorkspaceEdit;
-      (function(WorkspaceEdit2) {
+      var WorkspaceEdit2;
+      (function(WorkspaceEdit3) {
         function is(value) {
           var candidate = value;
           return candidate && (candidate.changes !== void 0 || candidate.documentChanges !== void 0) && (candidate.documentChanges === void 0 || candidate.documentChanges.every(function(change) {
@@ -3769,8 +3769,8 @@ var require_main2 = __commonJS({
             }
           }));
         }
-        WorkspaceEdit2.is = is;
-      })(WorkspaceEdit || (exports3.WorkspaceEdit = WorkspaceEdit = {}));
+        WorkspaceEdit3.is = is;
+      })(WorkspaceEdit2 || (exports3.WorkspaceEdit = WorkspaceEdit2 = {}));
       var TextEditChangeImpl = (
         /** @class */
         (function() {
@@ -4343,18 +4343,18 @@ var require_main2 = __commonJS({
         }
         DocumentSymbol2.is = is;
       })(DocumentSymbol || (exports3.DocumentSymbol = DocumentSymbol = {}));
-      var CodeActionKind;
-      (function(CodeActionKind2) {
-        CodeActionKind2.Empty = "";
-        CodeActionKind2.QuickFix = "quickfix";
-        CodeActionKind2.Refactor = "refactor";
-        CodeActionKind2.RefactorExtract = "refactor.extract";
-        CodeActionKind2.RefactorInline = "refactor.inline";
-        CodeActionKind2.RefactorRewrite = "refactor.rewrite";
-        CodeActionKind2.Source = "source";
-        CodeActionKind2.SourceOrganizeImports = "source.organizeImports";
-        CodeActionKind2.SourceFixAll = "source.fixAll";
-      })(CodeActionKind || (exports3.CodeActionKind = CodeActionKind = {}));
+      var CodeActionKind2;
+      (function(CodeActionKind3) {
+        CodeActionKind3.Empty = "";
+        CodeActionKind3.QuickFix = "quickfix";
+        CodeActionKind3.Refactor = "refactor";
+        CodeActionKind3.RefactorExtract = "refactor.extract";
+        CodeActionKind3.RefactorInline = "refactor.inline";
+        CodeActionKind3.RefactorRewrite = "refactor.rewrite";
+        CodeActionKind3.Source = "source";
+        CodeActionKind3.SourceOrganizeImports = "source.organizeImports";
+        CodeActionKind3.SourceFixAll = "source.fixAll";
+      })(CodeActionKind2 || (exports3.CodeActionKind = CodeActionKind2 = {}));
       var CodeActionTriggerKind;
       (function(CodeActionTriggerKind2) {
         CodeActionTriggerKind2.Invoked = 1;
@@ -4379,8 +4379,8 @@ var require_main2 = __commonJS({
         }
         CodeActionContext2.is = is;
       })(CodeActionContext || (exports3.CodeActionContext = CodeActionContext = {}));
-      var CodeAction;
-      (function(CodeAction2) {
+      var CodeAction2;
+      (function(CodeAction3) {
         function create(title, kindOrCommandOrEdit, kind) {
           var result = { title };
           var checkKind = true;
@@ -4397,13 +4397,13 @@ var require_main2 = __commonJS({
           }
           return result;
         }
-        CodeAction2.create = create;
+        CodeAction3.create = create;
         function is(value) {
           var candidate = value;
-          return candidate && Is.string(candidate.title) && (candidate.diagnostics === void 0 || Is.typedArray(candidate.diagnostics, Diagnostic.is)) && (candidate.kind === void 0 || Is.string(candidate.kind)) && (candidate.edit !== void 0 || candidate.command !== void 0) && (candidate.command === void 0 || Command.is(candidate.command)) && (candidate.isPreferred === void 0 || Is.boolean(candidate.isPreferred)) && (candidate.edit === void 0 || WorkspaceEdit.is(candidate.edit));
+          return candidate && Is.string(candidate.title) && (candidate.diagnostics === void 0 || Is.typedArray(candidate.diagnostics, Diagnostic.is)) && (candidate.kind === void 0 || Is.string(candidate.kind)) && (candidate.edit !== void 0 || candidate.command !== void 0) && (candidate.command === void 0 || Command.is(candidate.command)) && (candidate.isPreferred === void 0 || Is.boolean(candidate.isPreferred)) && (candidate.edit === void 0 || WorkspaceEdit2.is(candidate.edit));
         }
-        CodeAction2.is = is;
-      })(CodeAction || (exports3.CodeAction = CodeAction = {}));
+        CodeAction3.is = is;
+      })(CodeAction2 || (exports3.CodeAction = CodeAction2 = {}));
       var CodeLens;
       (function(CodeLens2) {
         function create(range, data) {
@@ -4584,7 +4584,7 @@ var require_main2 = __commonJS({
         InlayHint2.create = create;
         function is(value) {
           var candidate = value;
-          return Is.objectLiteral(candidate) && Position.is(candidate.position) && (Is.string(candidate.label) || Is.typedArray(candidate.label, InlayHintLabelPart.is)) && (candidate.kind === void 0 || InlayHintKind.is(candidate.kind)) && candidate.textEdits === void 0 || Is.typedArray(candidate.textEdits, TextEdit.is) && (candidate.tooltip === void 0 || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip)) && (candidate.paddingLeft === void 0 || Is.boolean(candidate.paddingLeft)) && (candidate.paddingRight === void 0 || Is.boolean(candidate.paddingRight));
+          return Is.objectLiteral(candidate) && Position2.is(candidate.position) && (Is.string(candidate.label) || Is.typedArray(candidate.label, InlayHintLabelPart.is)) && (candidate.kind === void 0 || InlayHintKind.is(candidate.kind)) && candidate.textEdits === void 0 || Is.typedArray(candidate.textEdits, TextEdit.is) && (candidate.tooltip === void 0 || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip)) && (candidate.paddingLeft === void 0 || Is.boolean(candidate.paddingLeft)) && (candidate.paddingRight === void 0 || Is.boolean(candidate.paddingRight));
         }
         InlayHint2.is = is;
       })(InlayHint || (exports3.InlayHint = InlayHint = {}));
@@ -4773,7 +4773,7 @@ var require_main2 = __commonJS({
             var lineOffsets = this.getLineOffsets();
             var low = 0, high = lineOffsets.length;
             if (high === 0) {
-              return Position.create(0, offset);
+              return Position2.create(0, offset);
             }
             while (low < high) {
               var mid = Math.floor((low + high) / 2);
@@ -4784,7 +4784,7 @@ var require_main2 = __commonJS({
               }
             }
             var line = low - 1;
-            return Position.create(line, offset - lineOffsets[line]);
+            return Position2.create(line, offset - lineOffsets[line]);
           };
           FullTextDocument2.prototype.offsetAt = function(position) {
             var lineOffsets = this.getLineOffsets();
@@ -18137,6 +18137,7 @@ async function activate(context) {
     })
   );
   registerCommands(context, output);
+  registerVersionSourceAction(context);
   await startLanguageClient(context, output);
 }
 async function deactivate() {
@@ -18180,6 +18181,50 @@ function registerCommands(context, output) {
       }
     })
   );
+}
+function registerVersionSourceAction(context) {
+  const languageVersion = extensionLanguageVersion(context);
+  if (!languageVersion) {
+    return;
+  }
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider(
+      "onlyfile",
+      {
+        provideCodeActions(document) {
+          if (/^\s*!version(?:\s|$)/m.test(document.getText())) {
+            return [];
+          }
+          const action = new vscode.CodeAction(
+            `Insert !version ${languageVersion}`,
+            vscode.CodeActionKind.Source
+          );
+          const edit = new vscode.WorkspaceEdit();
+          const firstLine = document.lineAt(0).text;
+          const insertAt = new vscode.Position(0, firstLine.startsWith("\uFEFF") ? 1 : 0);
+          edit.insert(document.uri, insertAt, `!version ${languageVersion}
+
+`);
+          action.edit = edit;
+          return [action];
+        }
+      },
+      {
+        providedCodeActionKinds: [vscode.CodeActionKind.Source]
+      }
+    )
+  );
+}
+function extensionLanguageVersion(context) {
+  const packageJson = context.extension.packageJSON;
+  if (typeof packageJson.version !== "string") {
+    return void 0;
+  }
+  const match = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\./.exec(packageJson.version);
+  if (!match || match[1] === "0" && match[2] === "0") {
+    return void 0;
+  }
+  return `${match[1]}.${match[2]}`;
 }
 async function startLanguageClient(context, output, options) {
   const serverOptions = await resolveServerOptions(context, output, options);

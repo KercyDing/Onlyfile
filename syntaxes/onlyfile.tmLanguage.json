@@ -5,6 +5,7 @@
     { "include": "#docComment" },
     { "include": "#lineComment" },
     { "include": "#namespace" },
+    { "include": "#versionDirective" },
     { "include": "#directive" },
     { "include": "#taskHeader" },
     { "include": "#interpolation" },
@@ -33,6 +34,14 @@
         "2": { "name": "punctuation.section.brackets.begin.onlyfile" },
         "3": { "name": "entity.name.namespace.onlyfile" },
         "4": { "name": "punctuation.section.brackets.end.onlyfile" }
+      }
+    },
+    "versionDirective": {
+      "name": "meta.directive.version.onlyfile",
+      "match": "^(\\s*)(!version)(\\s+)([0-9]+\\.[0-9]+)(\\s*)$",
+      "captures": {
+        "2": { "name": "keyword.control.directive.onlyfile" },
+        "4": { "name": "constant.numeric.version.onlyfile" }
       }
     },
     "directive": {
