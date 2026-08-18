@@ -89,17 +89,10 @@
         "0": { "name": "punctuation.separator.header.onlyfile" }
       },
       "patterns": [
+        { "include": "#dependencyClause" },
         {
           "name": "variable.parameter.onlyfile",
           "match": "(?<=\\(|,)\\s*([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*(?:=|,|\\)))"
-        },
-        {
-          "match": "(?<=&)\\s*([A-Za-z_-][A-Za-z0-9_.-]*)",
-          "captures": {
-            "1": {
-              "name": "entity.name.function.dependency.onlyfile"
-            }
-          }
         },
         {
           "name": "support.function.guard.onlyfile",
@@ -119,6 +112,22 @@
         { "include": "#string" },
         { "include": "#interpolation" },
         { "include": "#boolean" }
+      ]
+    },
+    "dependencyClause": {
+      "name": "meta.dependency.onlyfile",
+      "begin": "&",
+      "end": "(?=&|\\bshell(?:~=|=)|:\\s*$)",
+      "patterns": [
+        {
+          "match": "(?:(?<=&)|(?<=\\()|(?<=,))\\s*([A-Za-z_-][A-Za-z0-9_.-]*)(?=\\s*(?:\\(|,|\\)|$))",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.dependency.onlyfile"
+            }
+          }
+        },
+        { "include": "#string" }
       ]
     },
     "commandBlock": {
