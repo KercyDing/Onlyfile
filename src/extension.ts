@@ -21,6 +21,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   output.appendLine("Activating Onlyfile extension.");
 
   registerCommands(context, output);
+  registerStructureHighlighting(context);
   await startLanguageClient(context, output);
 }
 
@@ -52,6 +53,154 @@ function registerCommands(context: vscode.ExtensionContext, output: vscode.Outpu
       );
     }),
   );
+}
+
+function registerStructureHighlighting(context: vscode.ExtensionContext): void {
+  const decoration = vscode.window.createTextEditorDecorationType({
+    color: new vscode.ThemeColor("editorBracketHighlight.foreground1"),
+  });
+
+  const updateEditor = (editor: vscode.TextEditor): void => {
+    if (editor.document.languageId !== "onlyfile") {
+      return;
+    }
+    editor.setDecorations(decoration, structureDelimiterRanges(editor.document));
+  };
+
+  context.subscriptions.push(
+    decoration,
+    vscode.window.onDidChangeVisibleTextEditors((editors) => {
+      editors.forEach(updateEditor);
+    }),
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      vscode.window.visibleTextEditors
+        .filter((editor) => editor.document === event.document)
+        .forEach(updateEditor);
+    }),
+  );
+
+  vscode.window.visibleTextEditors.forEach(updateEditor);
+}
+
+function structureDelimiterRanges(document: vscode.TextDocument): vscode.Range[] {
+  const ranges: vscode.Range[] = [];
+  const groupIndents: string[] = [];
+  const groupPattern = /^(\s*)group\s+[A-Za-z_-][A-Za-z0-9_-]*\s*\{\s*$/;
+  const groupClosePattern = /^(\s*)\}\s*$/;
+  const metadataPattern = /^\s*\[(?:help|desc|pass|fail)\](?=\s|$)/;
+  const taskPattern = /^\s*[A-Za-z_-][A-Za-z0-9_-]*\s*\(/;
+
+  for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber += 1) {
+    const line = document.lineAt(lineNumber).text;
+    const groupMatch = groupPattern.exec(line);
+    if (groupMatch) {
+      const brace = line.lastIndexOf("{");
+      ranges.push(characterRange(lineNumber, brace));
+      groupIndents.push(groupMatch[1]);
+      continue;
+    }
+
+    const groupCloseMatch = groupClosePattern.exec(line);
+    if (groupCloseMatch && groupIndents.at(-1) === groupCloseMatch[1]) {
+      ranges.push(characterRange(lineNumber, line.indexOf("}")));
+      groupIndents.pop();
+      continue;
+    }
+
+    if (metadataPattern.test(line)) {
+      ranges.push(
+        characterRange(lineNumber, line.indexOf("[")),
+        characterRange(lineNumber, line.indexOf("]")),
+      );
+      continue;
+    }
+
+    if (!taskPattern.test(line)) {
+      continue;
+    }
+
+    const openingParen = line.indexOf("(");
+    const closingParen = findClosingParen(line, openingParen);
+    if (closingParen === undefined || !isTaskHeader(document, lineNumber, closingParen)) {
+      continue;
+    }
+
+    ranges.push(
+      characterRange(lineNumber, openingParen),
+      characterRange(lineNumber, closingParen),
+    );
+  }
+
+  return ranges;
+}
+
+function characterRange(line: number, character: number): vscode.Range {
+  return new vscode.Range(line, character, line, character + 1);
+}
+
+function findClosingParen(line: string, openingParen: number): number | undefined {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = openingParen; index < line.length; index += 1) {
+    const character = line[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (inString && character === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (character === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) {
+      continue;
+    }
+    if (character === "(") {
+      depth += 1;
+    } else if (character === ")" && --depth === 0) {
+      return index;
+    }
+  }
+
+  return undefined;
+}
+
+function isTaskHeader(
+  document: vscode.TextDocument,
+  signatureLine: number,
+  closingParen: number,
+): boolean {
+  const signatureTail = document.lineAt(signatureLine).text.slice(closingParen + 1).trim();
+  if (signatureTail.endsWith(":")) {
+    return true;
+  }
+  if (signatureTail !== "" && !isHeaderContinuation(signatureTail)) {
+    return false;
+  }
+
+  for (let lineNumber = signatureLine + 1; lineNumber < document.lineCount; lineNumber += 1) {
+    const line = document.lineAt(lineNumber).text.trim();
+    if (line === ":") {
+      return true;
+    }
+    if (line === "" || !isHeaderContinuation(line)) {
+      return false;
+    }
+    if (line.endsWith(":")) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isHeaderContinuation(line: string): boolean {
+  return line.startsWith("?") || line.startsWith("&") || line.startsWith("shell=") || line.startsWith("shell~=");
 }
 
 async function startLanguageClient(
