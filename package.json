@@ -1,7 +1,7 @@
 {
   "name": "onlyfile",
   "displayName": "Only",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "VS Code support for Onlyfile with syntax highlighting and only-lsp integration.",
   "categories": [
     "Programming Languages"
@@ -63,6 +63,23 @@
         "language": "onlyfile",
         "scopeName": "source.onlyfile",
         "path": "./syntaxes/onlyfile.tmLanguage.json"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "onlyfile",
+        "scopes": {
+          "directive": ["storage.modifier.directive.onlyfile"],
+          "namespace": ["entity.name.type.namespace.onlyfile"],
+          "task": ["entity.name.function.task.onlyfile"],
+          "parameter": ["variable.parameter.onlyfile"],
+          "guard": ["storage.modifier.directive.onlyfile"],
+          "dependency": ["entity.name.function.dependency.onlyfile"],
+          "shell": ["storage.modifier.directive.onlyfile"],
+          "variable": ["variable.other.constant.onlyfile"],
+          "metadata": ["entity.other.attribute-name.metadata.onlyfile"],
+          "blockMarker": ["keyword.control.command-block.onlyfile"]
+        }
       }
     ]
   },

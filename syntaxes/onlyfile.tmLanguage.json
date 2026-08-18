@@ -2,7 +2,7 @@
   "name": "Onlyfile",
   "scopeName": "source.onlyfile",
   "patterns": [
-    { "include": "#docComment" },
+    { "include": "#metadataComment" },
     { "include": "#lineComment" },
     { "include": "#namespace" },
     { "include": "#namespaceClose" },
@@ -15,30 +15,31 @@
     { "include": "#interpolation" }
   ],
   "repository": {
-    "docComment": {
-      "name": "meta.documentation.onlyfile",
-      "match": "^(\\s*)(#)(.*)$",
-      "captures": {
-        "2": { "name": "punctuation.definition.documentation.onlyfile" },
-        "3": { "name": "markup.quote.documentation.onlyfile" }
-      }
+    "metadataComment": {
+      "name": "meta.metadata.onlyfile",
+      "begin": "^(\\s*)(\\[(?:help|desc|pass|fail)\\])(?=\\s|$)",
+      "beginCaptures": {
+        "2": { "name": "entity.other.attribute-name.metadata.onlyfile" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#interpolation" }
+      ]
     },
     "lineComment": {
-      "name": "comment.line.double-slash.onlyfile",
-      "match": "^(\\s*)(//)(.*)$",
+      "name": "comment.line.onlyfile",
+      "match": "^(\\s*)(#|//)(.*)$",
       "captures": {
         "2": { "name": "punctuation.definition.comment.onlyfile" }
       }
     },
     "namespace": {
       "name": "meta.namespace.onlyfile",
-      "match": "^(\\s*)(?:(namespace)(\\s+))?(\\[)([A-Za-z_-][A-Za-z0-9_-]*)(\\])(\\s*)(\\{)?(\\s*)$",
+      "match": "^(\\s*)(group)(\\s+)([A-Za-z_-][A-Za-z0-9_-]*)(\\s*)(\\{)?(\\s*)$",
       "captures": {
         "2": { "name": "storage.type.namespace.onlyfile" },
-        "4": { "name": "punctuation.section.brackets.begin.onlyfile" },
-        "5": { "name": "entity.name.type.namespace.onlyfile" },
-        "6": { "name": "punctuation.section.brackets.end.onlyfile" },
-        "8": { "name": "punctuation.section.braces.begin.onlyfile" }
+        "4": { "name": "entity.name.type.namespace.onlyfile" },
+        "6": { "name": "punctuation.section.braces.begin.onlyfile" }
       }
     },
     "namespaceClose": {
@@ -93,14 +94,6 @@
           "match": "(?<=\\(|,)\\s*([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*(?:=|,|\\)))"
         },
         {
-          "name": "keyword.control.guard.onlyfile",
-          "match": "\\?"
-        },
-        {
-          "name": "keyword.operator.dependency.onlyfile",
-          "match": "&"
-        },
-        {
           "match": "(?<=&)\\s*([A-Za-z_-][A-Za-z0-9_.-]*)",
           "captures": {
             "1": {
@@ -116,16 +109,12 @@
           "match": "\\b(shell~=|shell=)([A-Za-z_-][A-Za-z0-9_-]*)",
           "captures": {
             "1": {
-              "name": "keyword.control.guard.onlyfile"
+              "name": "keyword.operator.shell.onlyfile"
             },
             "2": {
-              "name": "keyword.control.guard.onlyfile"
+              "name": "string.unquoted.shell.onlyfile"
             }
           }
-        },
-        {
-          "name": "keyword.operator.assignment.onlyfile",
-          "match": "="
         },
         { "include": "#string" },
         { "include": "#interpolation" },
@@ -152,18 +141,18 @@
       }
     },
     "interpolation": {
-      "name": "constant.character.escape.interpolation.onlyfile",
+      "name": "meta.interpolation.onlyfile",
       "begin": "\\{\\{",
       "beginCaptures": {
-        "0": { "name": "constant.character.escape.interpolation.onlyfile" }
+        "0": { "name": "punctuation.section.interpolation.begin.onlyfile" }
       },
       "end": "\\}\\}",
       "endCaptures": {
-        "0": { "name": "constant.character.escape.interpolation.onlyfile" }
+        "0": { "name": "punctuation.section.interpolation.end.onlyfile" }
       },
       "patterns": [
         {
-          "name": "constant.character.escape.interpolation.onlyfile",
+          "name": "variable.other.interpolation.onlyfile",
           "match": "[A-Za-z_-][A-Za-z0-9_-]*"
         }
       ]
