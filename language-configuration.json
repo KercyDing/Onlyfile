@@ -17,6 +17,18 @@
       }
     },
     {
+      "beforeText": "^\\s*[A-Za-z_-][A-Za-z0-9_-]*\\s*\\([^\\r\\n]*\\)[^\\r\\n]*:\\s*$",
+      "action": {
+        "indent": "indent"
+      }
+    },
+    {
+      "beforeText": "^\\s*:\\s*$",
+      "action": {
+        "indent": "indent"
+      }
+    },
+    {
       "beforeText": "^\\s*\\|(?:[ \\t].*)?$",
       "action": {
         "indent": "none",
