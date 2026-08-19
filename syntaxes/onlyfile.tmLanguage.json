@@ -10,6 +10,7 @@
     { "include": "#variableDirective" },
     { "include": "#directive" },
     { "include": "#invalidInlineTask" },
+    { "include": "#taskHeaderNoColon" },
     { "include": "#taskHeader" },
     { "include": "#commandBlock" },
     { "include": "#interpolation" }
@@ -78,6 +79,15 @@
       "name": "invalid.illegal.inline-task-command.onlyfile",
       "match": "^(\\s*)[A-Za-z_-][A-Za-z0-9_-]*(?=\\s*\\().*:[ \\t]+\\S.*$"
     },
+    "taskHeaderNoColon": {
+      "name": "meta.task.header.onlyfile",
+      "match": "^(\\s*)([A-Za-z_-][A-Za-z0-9_-]*)(\\s*)(\\()([^()]*)(\\))(.*)$",
+      "captures": {
+        "2": { "name": "entity.name.function.task.onlyfile" },
+        "4": { "name": "punctuation.section.parameters.begin.onlyfile" },
+        "6": { "name": "punctuation.section.parameters.end.onlyfile" }
+      }
+    },
     "taskHeader": {
       "name": "meta.task.header.onlyfile",
       "begin": "^(\\s*)([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*\\()",
@@ -90,6 +100,14 @@
       },
       "patterns": [
         { "include": "#dependencyClause" },
+        {
+          "name": "punctuation.section.parameters.begin.onlyfile",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.section.parameters.end.onlyfile",
+          "match": "\\)"
+        },
         {
           "name": "variable.parameter.onlyfile",
           "match": "(?<=\\(|,)\\s*([A-Za-z_-][A-Za-z0-9_-]*)(?=\\s*(?:=|,|\\)))"

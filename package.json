@@ -65,6 +65,13 @@
         "path": "./syntaxes/onlyfile.tmLanguage.json"
       }
     ],
+    "semanticTokenTypes": [
+      {
+        "id": "delimiter",
+        "superType": "number",
+        "description": "Task parameter-list delimiters"
+      }
+    ],
     "semanticTokenScopes": [
       {
         "language": "onlyfile",
@@ -78,7 +85,8 @@
           "shell": ["storage.modifier.directive.onlyfile"],
           "variable": ["variable.other.constant.onlyfile"],
           "metadata": ["entity.other.attribute-name.metadata.onlyfile"],
-          "blockMarker": ["keyword.control.command-block.onlyfile"]
+          "blockMarker": ["keyword.control.command-block.onlyfile"],
+          "delimiter": ["constant.numeric.onlyfile"]
         }
       }
     ]
