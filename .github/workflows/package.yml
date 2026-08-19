@@ -1,6 +1,8 @@
 name: Package Onlyfile extension
 
 on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
