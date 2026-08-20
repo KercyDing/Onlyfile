@@ -1,5 +1,7 @@
+import { execFile } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { promisify } from "node:util";
 import * as vscode from "vscode";
 import {
   Executable,
@@ -12,6 +14,10 @@ import {
 
 let client: LanguageClient | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
+const execFileAsync = promisify(execFile);
+const binaryCheckDelay = 400;
+const binaryCheckTimeout = 5_000;
+const onlyRepositoryUrl = "https://github.com/KercyDing/only";
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const output = vscode.window.createOutputChannel("Onlyfile");
@@ -23,6 +29,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   registerCommands(context, output);
   registerTaskCodeLens(context);
   registerStructureHighlighting(context);
+  registerBinaryValidation(context, output);
   await startLanguageClient(context, output);
 }
 
@@ -55,7 +62,7 @@ function registerCommands(context: vscode.ExtensionContext, output: vscode.Outpu
     }),
     vscode.commands.registerCommand(
       "onlyfile.runTask",
-      async (uri: vscode.Uri, taskName: string) => runTask(uri, taskName),
+      async (uri: vscode.Uri, taskPath: string[]) => runTask(uri, taskPath),
     ),
   );
 }
@@ -68,12 +75,119 @@ function registerTaskCodeLens(context: vscode.ExtensionContext): void {
   );
 }
 
+function registerBinaryValidation(context: vscode.ExtensionContext, output: vscode.OutputChannel): void {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let revision = 0;
+
+  void validateOnlyBinary(revision, () => revision, output);
+
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
+    if (!event.affectsConfiguration("onlyfile.path")) {
+      return;
+    }
+
+    revision += 1;
+    const currentRevision = revision;
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      void validateOnlyBinary(currentRevision, () => revision, output);
+    }, binaryCheckDelay);
+  }));
+}
+
+async function validateOnlyBinary(
+  revision: number,
+  currentRevision: () => number,
+  output: vscode.OutputChannel,
+): Promise<void> {
+  const binaryPath = vscode.workspace.getConfiguration("onlyfile").get<string>("path", "only").trim();
+  if (!binaryPath) {
+    showBinaryError(revision, currentRevision, output, "Only binary path is empty.");
+    return;
+  }
+
+  try {
+    const { stdout } = await execFileAsync(binaryPath, ["-V"], {
+      encoding: "utf8",
+      timeout: binaryCheckTimeout,
+      windowsHide: true,
+    });
+    const version = stdout.trim();
+    if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) {
+      showBinaryError(
+        revision,
+        currentRevision,
+        output,
+        `\`${binaryPath}\` is not an Only executable (received \`${version || "no version"}\`).`,
+      );
+      return;
+    }
+    if (revision === currentRevision()) {
+      output.appendLine(`Only executable verified: ${binaryPath} (${version})`);
+    }
+  } catch (error) {
+    showBinaryError(
+      revision,
+      currentRevision,
+      output,
+      binaryErrorMessage(binaryPath, error),
+      isMissingExecutable(error),
+    );
+  }
+}
+
+function showBinaryError(
+  revision: number,
+  currentRevision: () => number,
+  output: vscode.OutputChannel,
+  message: string,
+  showDownload: boolean = false,
+): void {
+  if (revision !== currentRevision()) {
+    return;
+  }
+  output.appendLine(message);
+  if (!showDownload) {
+    void vscode.window.showErrorMessage(message);
+    return;
+  }
+  void vscode.window.showErrorMessage(message, "Download Only").then((action) => {
+    if (action === "Download Only") {
+      void vscode.env.openExternal(vscode.Uri.parse(onlyRepositoryUrl));
+    }
+  });
+}
+
+function binaryErrorMessage(binaryPath: string, error: unknown): string {
+  const code = processErrorCode(error);
+  if (code === "ENOENT") {
+    return `Only executable not found: \`${binaryPath}\`. Check Onlyfile: Path.`;
+  }
+  if (code === "EACCES") {
+    return `Only executable cannot be run: \`${binaryPath}\`.`;
+  }
+  if (code === "ETIMEDOUT") {
+    return `Only executable did not respond: \`${binaryPath}\`.`;
+  }
+  return `Could not verify Only executable: \`${binaryPath}\`.`;
+}
+
+function isMissingExecutable(error: unknown): boolean {
+  return processErrorCode(error) === "ENOENT";
+}
+
+function processErrorCode(error: unknown): unknown {
+  return typeof error === "object" && error && "code" in error ? error.code : undefined;
+}
+
 class TaskCodeLensProvider implements vscode.CodeLensProvider {
   provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
     const lenses: vscode.CodeLens[] = [];
     const groups: Array<{ name: string; indent: number }> = [];
     const groupPattern = /^\s*group\s+([A-Za-z_-][A-Za-z0-9_-]*)\s*\{\s*$/;
-    const taskPattern = /^\s*([A-Za-z_-][A-Za-z0-9_-]*)\s*\(([^\r\n]*)\)/;
+    const taskPattern = /^\s*([A-Za-z_-][A-Za-z0-9_-]*)\s*\(([^()]*)\)/;
 
     for (let line = 0; line < document.lineCount; line += 1) {
       const text = document.lineAt(line).text;
@@ -99,11 +213,11 @@ class TaskCodeLensProvider implements vscode.CodeLensProvider {
         continue;
       }
 
-      const taskName = [...groups.map((group) => group.name), task[1]].join(".");
+      const taskPath = [...groups.map((group) => group.name), task[1]];
       lenses.push(new vscode.CodeLens(new vscode.Range(line, 0, line, 0), {
         title: "▶ Run",
         command: "onlyfile.runTask",
-        arguments: [document.uri, taskName],
+        arguments: [document.uri, taskPath],
       }));
     }
     return lenses;
@@ -172,7 +286,7 @@ function hasUnquotedEquals(raw: string): boolean {
   return false;
 }
 
-async function runTask(uri: vscode.Uri, taskName: string): Promise<void> {
+async function runTask(uri: vscode.Uri, taskPath: string[]): Promise<void> {
   const binaryPath = vscode.workspace
     .getConfiguration("onlyfile", uri)
     .get<string>("path", "only")
@@ -183,11 +297,11 @@ async function runTask(uri: vscode.Uri, taskName: string): Promise<void> {
   }
 
   const task = new vscode.Task(
-    { type: "onlyfile", task: taskName },
+    { type: "onlyfile", task: taskPath.join(".") },
     vscode.TaskScope.Workspace,
-    taskName,
+    taskPath.join("."),
     "Onlyfile",
-    new vscode.ShellExecution(binaryPath, [taskName], { cwd: path.dirname(uri.fsPath) }),
+    new vscode.ShellExecution(binaryPath, taskPath, { cwd: path.dirname(uri.fsPath) }),
   );
   task.presentationOptions = {
     reveal: vscode.TaskRevealKind.Always,
