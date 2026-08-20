@@ -1,7 +1,7 @@
 {
   "name": "onlyfile",
   "displayName": "Only",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "VS Code support for Onlyfile with syntax highlighting and only-lsp integration.",
   "categories": [
     "Programming Languages"
@@ -42,8 +42,24 @@
         "command": "onlyfile.restartLsp",
         "title": "Onlyfile: Restart LSP",
         "category": "Onlyfile"
+      },
+      {
+        "command": "onlyfile.runTask",
+        "title": "Onlyfile: Run Task",
+        "category": "Onlyfile"
       }
     ],
+    "configuration": {
+      "title": "Only",
+      "properties": {
+        "onlyfile.path": {
+          "type": "string",
+          "default": "only",
+          "scope": "machine",
+          "markdownDescription": "Set a custom path to the `only` executable. Example: `C:/only/only.exe`. The string `only` means lookup `only` in PATH."
+        }
+      }
+    },
     "languages": [
       {
         "id": "onlyfile",

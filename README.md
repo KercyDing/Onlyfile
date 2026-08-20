@@ -9,6 +9,8 @@ Current features:
 - editor language configuration for comments, brackets, quotes and so on
 - automatic startup of the `only-lsp` language client
 - diagnostics, hover, and other LSP features when `only-lsp` is available
+- `Run` CodeLens actions for task headers (helper tasks starting with `_` are hidden)
+- configurable `only` binary path in the VS Code settings
 
 The extension resolves the language server in this order:
 
@@ -23,6 +25,9 @@ The published VSIX contains binaries for macOS, Linux, and Windows on x64 and AR
 The extension provides these commands in the VS Code command palette:
 
 - `Onlyfile: Restart LSP` — restarts the running language server
+
+Set `Only: Path` when `only` is not available on `PATH`. The `Run` action uses
+that executable from the directory containing the current `Onlyfile`.
 
 ## Local development
 

@@ -4404,8 +4404,8 @@ var require_main2 = __commonJS({
         }
         CodeAction2.is = is;
       })(CodeAction || (exports3.CodeAction = CodeAction = {}));
-      var CodeLens;
-      (function(CodeLens2) {
+      var CodeLens2;
+      (function(CodeLens3) {
         function create(range, data) {
           var result = { range };
           if (Is.defined(data)) {
@@ -4413,13 +4413,13 @@ var require_main2 = __commonJS({
           }
           return result;
         }
-        CodeLens2.create = create;
+        CodeLens3.create = create;
         function is(value) {
           var candidate = value;
           return Is.defined(candidate) && Range2.is(candidate.range) && (Is.undefined(candidate.command) || Command.is(candidate.command));
         }
-        CodeLens2.is = is;
-      })(CodeLens || (exports3.CodeLens = CodeLens = {}));
+        CodeLens3.is = is;
+      })(CodeLens2 || (exports3.CodeLens = CodeLens2 = {}));
       var FormattingOptions;
       (function(FormattingOptions2) {
         function create(tabSize, insertSpaces) {
@@ -18121,6 +18121,7 @@ async function activate(context) {
   context.subscriptions.push(output);
   output.appendLine("Activating Onlyfile extension.");
   registerCommands(context, output);
+  registerTaskCodeLens(context);
   registerStructureHighlighting(context);
   await startLanguageClient(context, output);
 }
@@ -18148,8 +18149,132 @@ function registerCommands(context, output) {
           }
         }
       );
-    })
+    }),
+    vscode.commands.registerCommand(
+      "onlyfile.runTask",
+      async (uri, taskName) => runTask(uri, taskName)
+    )
   );
+}
+function registerTaskCodeLens(context) {
+  const provider = new TaskCodeLensProvider();
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider({ scheme: "file", language: "onlyfile" }, provider),
+    vscode.languages.registerCodeLensProvider({ scheme: "untitled", language: "onlyfile" }, provider)
+  );
+}
+var TaskCodeLensProvider = class {
+  provideCodeLenses(document) {
+    const lenses = [];
+    const groups = [];
+    const groupPattern = /^\s*group\s+([A-Za-z_-][A-Za-z0-9_-]*)\s*\{\s*$/;
+    const taskPattern = /^\s*([A-Za-z_-][A-Za-z0-9_-]*)\s*\(([^\r\n]*)\)/;
+    for (let line = 0; line < document.lineCount; line += 1) {
+      const text = document.lineAt(line).text;
+      const group = groupPattern.exec(text);
+      if (group) {
+        groups.push({ name: group[1], indent: text.search(/\S|$/) });
+        continue;
+      }
+      if (/^\s*\}\s*$/.test(text)) {
+        groups.pop();
+        continue;
+      }
+      const task = taskPattern.exec(text);
+      const indent = text.search(/\S|$/);
+      const expectedIndent = groups.length ? groups.at(-1).indent + 4 : 0;
+      if (!task || indent !== expectedIndent || task[1].startsWith("_") || hasRequiredParameter(task[2])) {
+        continue;
+      }
+      const taskName = [...groups.map((group2) => group2.name), task[1]].join(".");
+      lenses.push(new vscode.CodeLens(new vscode.Range(line, 0, line, 0), {
+        title: "\u25B6 Run",
+        command: "onlyfile.runTask",
+        arguments: [document.uri, taskName]
+      }));
+    }
+    return lenses;
+  }
+};
+function hasRequiredParameter(raw) {
+  return splitParameters(raw).some((parameter) => {
+    const text = parameter.trim();
+    return text.length > 0 && !hasUnquotedEquals(text);
+  });
+}
+function splitParameters(raw) {
+  const parameters = [];
+  let start = 0;
+  let quoted = false;
+  let escaped = false;
+  let depth = 0;
+  for (let index = 0; index < raw.length; index += 1) {
+    const character = raw[index];
+    if (quoted) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        quoted = false;
+      }
+      continue;
+    }
+    if (character === '"') {
+      quoted = true;
+    } else if (character === "(") {
+      depth += 1;
+    } else if (character === ")") {
+      depth = Math.max(0, depth - 1);
+    } else if (character === "," && depth === 0) {
+      parameters.push(raw.slice(start, index));
+      start = index + 1;
+    }
+  }
+  parameters.push(raw.slice(start));
+  return parameters;
+}
+function hasUnquotedEquals(raw) {
+  let quoted = false;
+  let escaped = false;
+  for (const character of raw) {
+    if (quoted) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        quoted = false;
+      }
+    } else if (character === '"') {
+      quoted = true;
+    } else if (character === "=") {
+      return true;
+    }
+  }
+  return false;
+}
+async function runTask(uri, taskName) {
+  const binaryPath = vscode.workspace.getConfiguration("onlyfile", uri).get("path", "only").trim();
+  if (!binaryPath) {
+    void vscode.window.showErrorMessage("Only binary path is empty.");
+    return;
+  }
+  const task = new vscode.Task(
+    { type: "onlyfile", task: taskName },
+    vscode.TaskScope.Workspace,
+    taskName,
+    "Onlyfile",
+    new vscode.ShellExecution(binaryPath, [taskName], { cwd: path.dirname(uri.fsPath) })
+  );
+  task.presentationOptions = {
+    reveal: vscode.TaskRevealKind.Always,
+    focus: false,
+    panel: vscode.TaskPanelKind.Shared,
+    showReuseMessage: true,
+    clear: false
+  };
+  await vscode.tasks.executeTask(task);
 }
 function registerStructureHighlighting(context) {
   const decoration = vscode.window.createTextEditorDecorationType({
