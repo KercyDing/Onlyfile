@@ -1,53 +1,63 @@
-# Onlyfile VS Code Extension
+# Onlyfile for VS Code
 
-VS Code support for the `Onlyfile` language.
+Write your workflow once, then see it, run it, and understand it directly in VS Code.
 
-Current features:
+Onlyfile brings the [Only](https://github.com/KercyDing/only) task language to your editor with syntax highlighting, live diagnostics, hover information, and one-click task execution.
 
-- file association for `Onlyfile` and `onlyfile`
-- TextMate syntax highlighting
-- editor language configuration for comments, brackets, quotes and so on
-- automatic startup of the `only-lsp` language client
-- diagnostics, hover, and other LSP features when `only-lsp` is available
-- `Run` CodeLens actions for task headers (helper tasks starting with `_` are hidden)
-- configurable `only` binary path in the VS Code settings
+![Onlyfile in VS Code](media/preview.webp)
 
-The extension resolves the language server in this order:
+## Built around the Onlyfile syntax
 
-1. `ONLY_LSP_BIN`
-2. `ONLY_LSP_DIR`
-3. the matching `only-lsp` binary bundled in the extension
+Keep commands, dependencies, parallel groups, guards, and task messages together in one readable file:
 
-The published VSIX contains binaries for macOS, Linux, and Windows on x64 and ARM64. The extension does not download executables at runtime. If the current platform binary is absent, syntax highlighting remains available but the language server is not started.
+```onlyfile
+ci()
+    & _prepare
+    & (front.check, back.check)
+    & (front.test, back.test)
+```
+
+The extension understands the structure of your workflow instead of treating it as plain text:
+
+- syntax highlighting for directives, tasks, parameters, dependencies, groups, and metadata
+- diagnostics while you write
+- hover details for tasks, parameters, and interpolated values
+- folding and document symbols for groups and task blocks
+- formatting through `only --fmt`
+- a `Run` action above every runnable task
+- support for task parameters, default values, guards, and parallel dependencies
+
+Tasks with a leading `_` are kept as implementation details, and tasks that still need a required parameter do not show a misleading `Run` action.
 
 ## Command palette
 
-The extension provides these commands in the VS Code command palette:
+Use the Command Palette to manage the language server without leaving your editor:
 
-- `Onlyfile: Restart LSP` — restarts the running language server
+- `Onlyfile: Restart LSP` — restart the Onlyfile language server
 
-Set `Only: Path` when `only` is not available on `PATH`. The `Run` action uses
-that executable from the directory containing the current `Onlyfile`.
+For everyday use, the quickest path is the `Run` action shown directly above a task. Group tasks are invoked with the same syntax as the CLI, for example `only back test`.
 
-## Local development
+## Get started
 
-1. `pnpm install`
-2. `pnpm build`
-3. Press `F5` in VS Code to launch an Extension Development Host
-4. Open an `Onlyfile` or `onlyfile` file
+1. Install the **Onlyfile** extension.
+2. Install the [Only CLI](https://github.com/KercyDing/only) and make sure `only` is available on your `PATH`.
+3. Open a file named `Onlyfile` or `onlyfile`.
+4. Click `Run` above a task to execute it.
 
-To use a local language server build directory during development:
+See the [Only usage guide](https://github.com/KercyDing/only/blob/master/docs/usage.md) for the complete language and CLI reference.
+
+The extension bundles the language server for supported macOS, Linux, and Windows platforms. Syntax highlighting remains available even when the language server cannot be started.
+
+## Environment variables
+
+Use these only when you need to point the extension at a locally built language server:
 
 ```bash
-ONLY_LSP_DIR=/absolute/path/to/only/target/release code .
+ONLY_LSP_DIR=/path/to/directory/containing/only-lsp
 ```
 
-An exact binary path is also supported:
+Or provide the exact server binary:
 
 ```bash
-ONLY_LSP_BIN=/absolute/path/to/only-lsp code .
+ONLY_LSP_BIN=/path/to/only-lsp
 ```
-
-## Packaging
-
-The `package.yml` workflow builds all six supported `only-lsp` binaries, embeds them in the VSIX, and publishes the VSIX together with the standalone binaries and SHA256 files in the GitHub release for the extension version.

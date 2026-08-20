@@ -7,7 +7,6 @@ tsconfig.json
 .gitignore
 pnpm-lock.yaml
 *.vsix
-media/icon.svg
 .github/**
 .claude/**
 lsp/.gitkeep
