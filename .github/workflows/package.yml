@@ -4,6 +4,11 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: Extension version to release (for example, v0.5.2)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -111,6 +116,30 @@ jobs:
 
       - name: Install extension dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Set extension version
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_TAG: ${{ inputs.version }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "version must use the vA.B.C format, for example v0.5.2" >&2
+            exit 1
+          fi
+          pnpm version "${RELEASE_TAG#v}" --no-git-tag-version
+
+      - name: Commit extension version
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: release $RELEASE_VERSION"
+          git push origin "HEAD:$TARGET_BRANCH"
 
       - name: Download build assets
         uses: actions/download-artifact@v4
