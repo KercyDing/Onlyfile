@@ -1,7 +1,7 @@
 {
   "name": "onlyfile",
   "displayName": "Only",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "VS Code support for Onlyfile with syntax highlighting and only-lsp integration.",
   "categories": [
     "Programming Languages"
@@ -28,7 +28,6 @@
     "watch": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js --watch",
     "check": "tsc -p ./ --noEmit"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.15.17",
     "@types/vscode": "^1.99.0",
@@ -92,17 +91,39 @@
       {
         "language": "onlyfile",
         "scopes": {
-          "directive": ["storage.modifier.directive.onlyfile"],
-          "namespace": ["entity.name.type.namespace.onlyfile"],
-          "task": ["entity.name.function.task.onlyfile"],
-          "parameter": ["variable.parameter.onlyfile"],
-          "guard": ["storage.modifier.directive.onlyfile"],
-          "dependency": ["entity.name.function.dependency.onlyfile"],
-          "shell": ["storage.modifier.directive.onlyfile"],
-          "variable": ["variable.other.constant.onlyfile"],
-          "metadata": ["entity.other.attribute-name.metadata.onlyfile"],
-          "blockMarker": ["keyword.control.command-block.onlyfile"],
-          "delimiter": ["constant.numeric.onlyfile"]
+          "directive": [
+            "storage.modifier.directive.onlyfile"
+          ],
+          "namespace": [
+            "entity.name.type.namespace.onlyfile"
+          ],
+          "task": [
+            "entity.name.function.task.onlyfile"
+          ],
+          "parameter": [
+            "variable.parameter.onlyfile"
+          ],
+          "guard": [
+            "storage.modifier.directive.onlyfile"
+          ],
+          "dependency": [
+            "entity.name.function.dependency.onlyfile"
+          ],
+          "shell": [
+            "storage.modifier.directive.onlyfile"
+          ],
+          "variable": [
+            "variable.other.constant.onlyfile"
+          ],
+          "metadata": [
+            "entity.other.attribute-name.metadata.onlyfile"
+          ],
+          "blockMarker": [
+            "keyword.control.command-block.onlyfile"
+          ],
+          "delimiter": [
+            "constant.numeric.onlyfile"
+          ]
         }
       }
     ]
